@@ -1,7 +1,10 @@
 #include <vector>
 #include <activation.h>
 #include <adam_optimizer.h>
-#include <layer.h>
+#include <tensors/tensor_1d.h>
+#include <tensors/tensor_2d.h>
+#include <layers/one_dimensional/layer1d.h>
+#include <layers/one_dimensional/dense.h>
 
 #ifndef NETWORK_H
 #define NETWORK_H
@@ -25,10 +28,11 @@ class Network
 	int in_count;
 	int layer_len;
 	int out_count;
-	vector<Layer> layers;
+	
+	vector<Layer1D*> layers;
 
-	vec1d inputs;
-	vec1d outputs;
+	tensor_1d inputs;
+	tensor_1d outputs;
 public:
 	Network(int in_count, int out_count, vector<LayerDescription> layer_descrs)
 	{
@@ -37,43 +41,43 @@ public:
 
 		layer_len = layer_descrs.size();
 
-		layers = vector<Layer>();
+		layers = vector<Layer1D*>();
 		int layer_in = in_count;
 
 		for(int i = 0; i < layer_len; ++i)
 		{
 			int layer_out = layer_descrs[i].length;
 
-			vec2d weights(layer_out, layer_in);
+			tensor_2d weights(layer_out, layer_in);
 			weights.make_random();
 
-			vec1d biases(layer_out);
+			tensor_1d biases(layer_out);
 			biases.make_random();
 
-			Layer layer(layer_descrs[i].activation, layer_in, layer_out, weights, biases);
+			Dense* layer = new Dense(layer_descrs[i].activation, layer_in, layer_out, weights, biases);
 			layers.push_back(layer);
 
 			layer_in = layer_out;
 		}
 	}
 
-	vec1d forward(vec1d inputs)
+	tensor_1d forward(tensor_1d inputs)
 	{
 		this->inputs = inputs;
-		vec1d intermediate = inputs;
+		tensor_1d intermediate = inputs;
 
 		for(int i = 0; i < layer_len; ++i)
 		{
-			intermediate = layers[i].forward(intermediate);
+			intermediate = layers[i]->forward(intermediate);
 		}
 
 		this->outputs = intermediate;
 		return this->outputs;
 	}
 
-	vec1d backward(vec1d outputs_true)
+	tensor_1d backward(tensor_1d outputs_true)
 	{
-		vec1d errors(out_count);
+		tensor_1d errors(out_count);
 
 		for(int i = 0; i < out_count; ++i)
 		{
@@ -82,7 +86,7 @@ public:
 
 		for(int i = layer_len - 1; i >= 0; --i)
 		{
-			errors = layers[i].backward(errors);
+			errors = layers[i]->backward(errors);
 		}
 
 		return errors;
@@ -92,7 +96,7 @@ public:
 	{
 		for(int i = 0; i < layer_len; ++i)
 		{
-			layers[i].fit(t, adam);
+			layers[i]->fit(t, adam);
 		}
 	}
 };

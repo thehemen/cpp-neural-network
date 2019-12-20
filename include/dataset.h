@@ -1,6 +1,6 @@
 #include <vector>
 #include <fstream>
-#include <vec.h>
+#include <tensors/tensor_1d.h>
 
 #ifndef DATASET_H
 #define DATASET_H
@@ -9,10 +9,10 @@ using namespace std;
 
 struct Sample
 {
-	vec1d inputs;
-	vec1d outputs;
+	tensor_1d inputs;
+	tensor_1d outputs;
 
-	Sample(vec1d inputs, vec1d outputs)
+	Sample(tensor_1d inputs, tensor_1d outputs)
 	{
 		this->inputs = inputs;
 		this->outputs = outputs;
@@ -109,8 +109,8 @@ vector<Sample> get_mnist_samples(string images_full_path, string labels_full_pat
     for(int i = 0; i < number_of_images; ++i)
     {
         int x = 0, y = 0;
-        vec1d inputs(width * height);
-		vec1d outputs(10);
+        tensor_1d inputs(width * height);
+		tensor_1d outputs(10);
         
         for(int j = 0; j < image_size; ++j)
         {
@@ -135,10 +135,10 @@ vector<Sample> get_mnist_samples(string images_full_path, string labels_full_pat
 vector<Sample> get_xor_samples()
 {
 	vector<Sample> samples;
-	samples.push_back(Sample(vec1d({0.0, 0.0}), vec1d(vector<double>({0.0}))));
-	samples.push_back(Sample(vec1d({0.0, 1.0}), vec1d(vector<double>({1.0}))));
-	samples.push_back(Sample(vec1d({1.0, 0.0}), vec1d(vector<double>({1.0}))));
-	samples.push_back(Sample(vec1d({1.0, 1.0}), vec1d(vector<double>({0.0}))));
+	samples.push_back(Sample(tensor_1d({0.0, 0.0}), tensor_1d(vector<double>({0.0}))));
+	samples.push_back(Sample(tensor_1d({0.0, 1.0}), tensor_1d(vector<double>({1.0}))));
+	samples.push_back(Sample(tensor_1d({1.0, 0.0}), tensor_1d(vector<double>({1.0}))));
+	samples.push_back(Sample(tensor_1d({1.0, 1.0}), tensor_1d(vector<double>({0.0}))));
 	return samples;
 }
 

@@ -1,33 +1,35 @@
 #include <omp.h>  // OpenMP headers
-#include <vec.h>
+#include <layers/one_dimensional/layer1d.h>
+#include <tensors/tensor_1d.h>
+#include <tensors/tensor_2d.h>
 #include <activation.h>
 #include <adam_optimizer.h>
 
-#ifndef LAYER_H
-#define LAYER_H
+#ifndef DENSE_H
+#define DENSE_H
 
 using namespace std;
 
-class Layer
+class Dense : public Layer1D
 {
 	Activation activation;
 	int in_count;
 	int out_count;
 
-	vec2d weights;
-	vec1d biases;
+	tensor_2d weights;
+	tensor_1d biases;
 
-	vec1d m_t;
-	vec1d v_t;
+	tensor_1d m_t;
+	tensor_1d v_t;
 
-	vec1d inputs;
-	vec1d errors;
-	vec1d args;
-	vec1d outputs;
+	tensor_1d inputs;
+	tensor_1d errors;
+	tensor_1d args;
+	tensor_1d outputs;
 public:
-	Layer() {}
+	Dense() : Layer1D() {}
 
-	Layer(Activation activation, int in_count, int out_count, vec2d weights, vec1d biases)
+	Dense(Activation activation, int in_count, int out_count, tensor_2d weights, tensor_1d biases)
 	{
 		this->activation = activation;
 		this->in_count = in_count;
@@ -36,16 +38,16 @@ public:
 		this->weights = weights;
 		this->biases = biases;
 
-		m_t = vec1d(out_count);
-		v_t = vec1d(out_count);
+		m_t = tensor_1d(out_count);
+		v_t = tensor_1d(out_count);
 
-		inputs = vec1d(in_count);
-		errors = vec1d(out_count);
-		args = vec1d(out_count);
-		outputs = vec1d(out_count);
+		inputs = tensor_1d(in_count);
+		errors = tensor_1d(out_count);
+		args = tensor_1d(out_count);
+		outputs = tensor_1d(out_count);
 	}
 
-	vec1d forward(vec1d inputs)
+	tensor_1d forward(tensor_1d inputs) override
 	{
 		this->inputs = inputs;
 		outputs.make_zero();
@@ -69,7 +71,7 @@ public:
 		return outputs;
 	}
 
-	vec1d backward(vec1d errors_next)
+	tensor_1d backward(tensor_1d errors_next) override
 	{
 		errors.make_zero();
 
@@ -79,7 +81,7 @@ public:
 			errors[i] = activation.der(outputs[i], args[i]) * errors_next[i];
 		}
 
-		vec1d errors_back(in_count);
+		tensor_1d errors_back(in_count);
 
 		#pragma omp parallel for
 		for(int j = 0; j < in_count; ++j)
@@ -97,7 +99,7 @@ public:
 		return errors_back;
 	}
 
-	void fit(int t, AdamOptimizer& adam)
+	void fit(int t, AdamOptimizer& adam) override
 	{
 		#pragma omp parallel for
 		for(int i = 0; i < out_count; ++i)

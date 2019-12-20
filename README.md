@@ -1,2 +1,2 @@
 # cpp-neural-network
-C++ Neural Network from scratch (paralled by OpenMP). Written for training purposes only.
+C++ Neural Network from scratch (parallelized by OpenMP). Written for training purposes only.

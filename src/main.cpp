@@ -1,6 +1,6 @@
 #include <iostream>
 #include <ctime>
-#include <vec.h>
+#include <tensors/tensor_1d.h>
 #include <dataset.h>
 #include <activation.h>
 #include <adam_optimizer.h>
@@ -12,11 +12,11 @@ using namespace std;
 int main()
 {
 	srand(time(0));
-	Activation relu(ActivationType::RELU);
+	Activation tanh(ActivationType::TANH);
 	Activation sigm(ActivationType::SIGMOID, 1.0);
 
 	vector<LayerDescription> layers;
-	layers.push_back(LayerDescription(relu, 32));
+	layers.push_back(LayerDescription(tanh, 32));
 	layers.push_back(LayerDescription(sigm, 10));
 	Network network(768, 10, layers);
 
@@ -49,7 +49,7 @@ int main()
 
 		for(int j = 0; j < test_num; ++j)
 		{
-			vec1d results = network.forward(test_samples[j].inputs);
+			tensor_1d results = network.forward(test_samples[j].inputs);
 			loss += categorical_crossentropy(test_samples[j].outputs, results);
 			acc += categorical_accuracy(test_samples[j].outputs, results);
 		}

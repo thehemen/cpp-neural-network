@@ -6,12 +6,12 @@
 
 const double EPSILON = 1e-9;
 
-double binary_crossentropy(vec1d y, vec1d p)
+double binary_crossentropy(tensor_1d y, tensor_1d p)
 {
 	return -(y[0] * log(p[0] + EPSILON) + (1 - y[0]) * log(1 - p[0] + EPSILON));
 }
 
-double categorical_crossentropy(vec1d y, vec1d p)
+double categorical_crossentropy(tensor_1d y, tensor_1d p)
 {
 	double loss = 0.0;
 
@@ -23,12 +23,12 @@ double categorical_crossentropy(vec1d y, vec1d p)
 	return -loss;
 }
 
-double binary_accuracy(vec1d y, vec1d p)
+double binary_accuracy(tensor_1d y, tensor_1d p)
 {
 	return y[0] == round(p[0]) ? 1.0 : 0.0;
 }
 
-double categorical_accuracy(vec1d y, vec1d p)
+double categorical_accuracy(tensor_1d y, tensor_1d p)
 {
 	double y_max = -DBL_MAX;
 	int y_argmax = 0;
