@@ -1,10 +1,22 @@
 #include <vector>
+#include <sstream>
+#include <map>
+
 #include <activation.h>
 #include <adam_optimizer.h>
+
 #include <tensors/tensor_1d.h>
 #include <tensors/tensor_2d.h>
+
 #include <layers/one_dimensional/layer1d.h>
 #include <layers/one_dimensional/dense.h>
+
+#include <layers/two_to_one_dim/layer2to1d.h>
+#include <layers/two_to_one_dim/flatten.h>
+
+#include <layers/two_dimensional/layer2d.h>
+#include <layers/two_dimensional/conv2d.h>
+#include <layers/two_dimensional/maxpooling2d.h>
 
 #ifndef NETWORK_H
 #define NETWORK_H
@@ -13,90 +25,222 @@ using namespace std;
 
 struct LayerDescription
 {
+	string layerType;
+	map<string, int> params;
 	Activation activation;
-	int length;
 
-	LayerDescription(Activation activation, int length)
+	LayerDescription(string layerType, map<string, int> params = map<string, int>(), Activation activation = Activation(ActivationType::NONE))
 	{
+		this->layerType = layerType;
+		this->params = params;
 		this->activation = activation;
-		this->length = length;
 	}
 };
 
 class Network
 {
-	int in_count;
-	int layer_len;
-	int out_count;
-	
-	vector<Layer1D*> layers;
+	int input_width;
+	int input_height;
 
-	tensor_1d inputs;
+	vector<Layer2D*> layer2d_s;
+	int layer2d_len;
+
+	Layer2to1D* layer2to1d;
+
+	vector<Layer1D*> layer1d_s;
+	int layer1d_len;
+
+	string info;
 	tensor_1d outputs;
 public:
-	Network(int in_count, int out_count, vector<LayerDescription> layer_descrs)
+	Network(vector<LayerDescription> layer_descrs, int in_width, int in_height)
 	{
-		this->in_count = in_count;
-		this->out_count = out_count;
+		this->input_width = in_width;
+		this->input_height = in_height;
 
-		layer_len = layer_descrs.size();
+		layer2d_s = vector<Layer2D*>();
+		layer1d_s = vector<Layer1D*>();
 
-		layers = vector<Layer1D*>();
-		int layer_in = in_count;
+		int input_count = 1;
+		int input_width = this->input_width;
+		int input_height = this->input_height;
 
-		for(int i = 0; i < layer_len; ++i)
+		stringstream ostream;
+		ostream << input_width << "x" << input_height << "\n";
+
+		for(int i = 0, layer_len = layer_descrs.size(); i < layer_len; ++i)
 		{
-			int layer_out = layer_descrs[i].length;
+			string layerType = layer_descrs[i].layerType;
+			map<string, int> params = layer_descrs[i].params;
+			Activation activation = layer_descrs[i].activation;
 
-			tensor_2d weights(layer_out, layer_in);
-			weights.make_random();
+			if(layerType == "conv2d")
+			{
+				int count = params["count"];
+				int width = params["width"];
+				int height = params["height"];
 
-			tensor_1d biases(layer_out);
-			biases.make_random();
+				tensor_3d kernel(count, width, height);
+				kernel.make_random();
 
-			Dense* layer = new Dense(layer_descrs[i].activation, layer_in, layer_out, weights, biases);
-			layers.push_back(layer);
+				tensor_1d biases(count);
+				biases.make_random();
 
-			layer_in = layer_out;
+				params["input_count"] = input_count;
+				params["input_width"] = input_width;
+				params["input_height"] = input_height;
+
+				int out_count = input_count * count;
+				int out_width = input_width - width + 1;
+				int out_height = input_height - height + 1;
+
+				params["out_count"] = out_count;
+				params["out_width"] = out_width;
+				params["out_height"] = out_height;
+
+				params["padding_width"] = input_width - out_width;
+				params["padding_height"] = input_height - out_height;
+
+				params["gradient_width"] = input_width + params["padding_width"];
+				params["gradient_height"] = input_height + params["padding_height"];
+
+				Conv2D* conv2d = new Conv2D(activation, kernel, biases, params);
+				layer2d_s.push_back(conv2d);
+
+				input_count = out_count;
+				input_width = out_width;
+				input_height = out_height;
+
+				ostream << input_count << "x" << input_width << "x" << input_height;
+				ostream << "\tConv2D\n";
+			}
+			else if(layerType == "maxpooling2d")
+			{
+				int width = params["width"];
+				int height = params["height"];
+
+				int out_width = input_width / width;
+				int out_height = input_height / height;
+
+				params["input_count"] = input_count;
+				params["input_width"] = input_width;
+				params["input_height"] = input_height;
+
+				params["out_width"] = out_width;
+				params["out_height"] = out_height;
+
+				MaxPooling2D* maxpool2d = new MaxPooling2D(params);
+				layer2d_s.push_back(maxpool2d);
+
+				input_width = out_width;
+				input_height = out_height;
+
+				ostream << input_count << "x" << input_width << "x" << input_height;
+				ostream << "\tMaxPooling2D\n";
+			}
+			else if(layerType == "flatten")
+			{
+				params["count"] = input_count;
+				params["width"] = input_width;
+				params["height"] = input_height;
+
+				Flatten* flatten = new Flatten(params);
+				layer2to1d = flatten;
+
+				input_count *= input_width * input_height;
+				input_width = 1;
+				input_height = 1;
+
+				ostream << input_count;
+				ostream << "\tFlatten\n";
+			}
+			else if(layerType == "dense")
+			{
+				int dense_out = params["length"];
+
+				tensor_2d weights(dense_out, input_count);
+				weights.make_random();
+
+				tensor_1d biases(dense_out);
+				biases.make_random();
+
+				params["input_count"] = input_count;
+
+				Dense* dense = new Dense(activation, weights, biases, params);
+				layer1d_s.push_back(dense);
+
+				input_count = dense_out;
+
+				ostream << input_count;
+				ostream << "\tDense\n";
+			}
 		}
+
+		layer2d_len = layer2d_s.size();
+		layer1d_len = layer1d_s.size();
+		info = ostream.str();
 	}
 
-	tensor_1d forward(tensor_1d inputs)
+	string get_shapes()
 	{
-		this->inputs = inputs;
-		tensor_1d intermediate = inputs;
+		return info;
+	}
 
-		for(int i = 0; i < layer_len; ++i)
+	tensor_1d forward(tensor_3d inputs)
+	{
+		tensor_3d tensor3d = inputs;
+
+		for(int i = 0; i < layer2d_len; ++i)
 		{
-			intermediate = layers[i]->forward(intermediate);
+			tensor3d = layer2d_s[i]->forward(tensor3d);
 		}
 
-		this->outputs = intermediate;
+		tensor_1d tensor1d = layer2to1d->forward(tensor3d);
+
+		for(int i = 0; i < layer1d_len; ++i)
+		{
+			tensor1d = layer1d_s[i]->forward(tensor1d);
+		}
+
+		this->outputs = tensor1d;
 		return this->outputs;
 	}
 
-	tensor_1d backward(tensor_1d outputs_true)
+	tensor_3d backward(tensor_1d outputs_true)
 	{
-		tensor_1d errors(out_count);
+		int out_count = this->outputs.size();
+		tensor_1d tensor1d(out_count);
 
 		for(int i = 0; i < out_count; ++i)
 		{
-			errors[i] = this->outputs[i] - outputs_true[i];
+			tensor1d[i] = this->outputs[i] - outputs_true[i];
 		}
 
-		for(int i = layer_len - 1; i >= 0; --i)
+		for(int i = layer1d_len - 1; i >= 0; --i)
 		{
-			errors = layers[i]->backward(errors);
+			tensor1d = layer1d_s[i]->backward(tensor1d);
 		}
 
-		return errors;
+		tensor_3d tensor3d = layer2to1d->backward(tensor1d);
+
+		for(int i = layer2d_len - 1; i >= 0; --i)
+		{
+			tensor3d = layer2d_s[i]->backward(tensor3d);
+		}
+
+		return tensor3d;
 	}
 
 	void fit(int t, AdamOptimizer& adam)
 	{
-		for(int i = 0; i < layer_len; ++i)
+		for(int i = 0; i < layer2d_len; ++i)
 		{
-			layers[i]->fit(t, adam);
+			layer2d_s[i]->fit(t, adam);
+		}
+
+		for(int i = 0; i < layer1d_len; ++i)
+		{
+			layer1d_s[i]->fit(t, adam);
 		}
 	}
 };

@@ -13,7 +13,7 @@ using namespace std;
 class Dense : public Layer1D
 {
 	Activation activation;
-	int in_count;
+	int input_count;
 	int out_count;
 
 	tensor_2d weights;
@@ -23,33 +23,38 @@ class Dense : public Layer1D
 	tensor_1d v_t;
 
 	tensor_1d inputs;
-	tensor_1d errors;
 	tensor_1d args;
 	tensor_1d outputs;
+
+	tensor_1d errors;
+	tensor_1d errors_back;
 public:
 	Dense() : Layer1D() {}
 
-	Dense(Activation activation, int in_count, int out_count, tensor_2d weights, tensor_1d biases)
+	Dense(Activation activation, tensor_2d weights, tensor_1d biases, map<string, int> params)
 	{
 		this->activation = activation;
-		this->in_count = in_count;
-		this->out_count = out_count;
-
 		this->weights = weights;
 		this->biases = biases;
+
+		input_count = params["input_count"];
+		out_count = params["length"];
 
 		m_t = tensor_1d(out_count);
 		v_t = tensor_1d(out_count);
 
-		inputs = tensor_1d(in_count);
-		errors = tensor_1d(out_count);
+		inputs = tensor_1d(input_count);
 		args = tensor_1d(out_count);
 		outputs = tensor_1d(out_count);
+
+		errors = tensor_1d(out_count);
+		errors_back = tensor_1d(input_count);
 	}
 
 	tensor_1d forward(tensor_1d inputs) override
 	{
 		this->inputs = inputs;
+		args.make_zero();
 		outputs.make_zero();
 
 		#pragma omp parallel for
@@ -57,7 +62,7 @@ public:
 		{
 			double sum = 0.0;
 
-			for(int j = 0; j < in_count; ++j)
+			for(int j = 0; j < input_count; ++j)
 			{
 				sum += weights[i][j] * inputs[j];
 			}
@@ -74,6 +79,7 @@ public:
 	tensor_1d backward(tensor_1d errors_next) override
 	{
 		errors.make_zero();
+		errors_back.make_zero();
 
 		#pragma omp parallel for
 		for(int i = 0; i < out_count; ++i)
@@ -81,10 +87,8 @@ public:
 			errors[i] = activation.der(outputs[i], args[i]) * errors_next[i];
 		}
 
-		tensor_1d errors_back(in_count);
-
 		#pragma omp parallel for
-		for(int j = 0; j < in_count; ++j)
+		for(int j = 0; j < input_count; ++j)
 		{
 			double sum = 0.0;
 
@@ -106,7 +110,7 @@ public:
 		{
 			double update = adam.optimize(t, m_t[i], v_t[i], errors[i]);
 
-			for(int j = 0; j < in_count; ++j)
+			for(int j = 0; j < input_count; ++j)
 			{
 				weights[i][j] += inputs[j] * update;
 			}

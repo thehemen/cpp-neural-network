@@ -35,6 +35,11 @@ public:
 		return vec.size();
 	}
 
+	int length()
+	{
+		return vec.size();
+	}
+
 	void make_zero()
 	{
 		fill(vec.begin(), vec.end(), 0);

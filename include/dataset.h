@@ -1,18 +1,32 @@
 #include <vector>
 #include <fstream>
 #include <tensors/tensor_1d.h>
+#include <tensors/tensor_2d.h>
+#include <tensors/tensor_3d.h>
 
 #ifndef DATASET_H
 #define DATASET_H
 
 using namespace std;
 
-struct Sample
+struct Sample1D
 {
-	tensor_1d inputs;
+    tensor_1d inputs;
+    tensor_1d outputs;
+
+    Sample1D(tensor_1d inputs, tensor_1d outputs)
+    {
+        this->inputs = inputs;
+        this->outputs = outputs;
+    }
+};
+
+struct Sample2to1D
+{
+	tensor_3d inputs;
 	tensor_1d outputs;
 
-	Sample(tensor_1d inputs, tensor_1d outputs)
+	Sample2to1D(tensor_3d inputs, tensor_1d outputs)
 	{
 		this->inputs = inputs;
 		this->outputs = outputs;
@@ -94,13 +108,13 @@ u_char* read_labels(string full_path, int& number_of_labels)
     }
 }
 
-vector<Sample> get_mnist_samples(string images_full_path, string labels_full_path)
+vector<Sample2to1D> get_mnist_samples(string images_full_path, string labels_full_path)
 {
 	const int width = 28;
 	const int height = 28;
 	const int nums = 10;
 
-	vector<Sample> samples;
+	vector<Sample2to1D> samples;
 
 	int number_of_images, number_of_labels, image_size;
     u_char** images = read_images(images_full_path, number_of_images, image_size);
@@ -109,12 +123,12 @@ vector<Sample> get_mnist_samples(string images_full_path, string labels_full_pat
     for(int i = 0; i < number_of_images; ++i)
     {
         int x = 0, y = 0;
-        tensor_1d inputs(width * height);
+        tensor_3d inputs(1, width, height);
 		tensor_1d outputs(10);
         
         for(int j = 0; j < image_size; ++j)
         {
-            inputs[x * width + y] = (double)(int)images[i][j] / 256.0;
+            inputs[0][x][y] = (double)(int)images[i][j] / 256.0;
             y++;
 
             if(y == 28)
@@ -126,19 +140,19 @@ vector<Sample> get_mnist_samples(string images_full_path, string labels_full_pat
 
         int class_id = (int)labels[i];
         outputs[class_id] = 1.0;
-        samples.push_back(Sample(inputs, outputs));
+        samples.push_back(Sample2to1D(inputs, outputs));
     }
 
 	return samples;
 }
 
-vector<Sample> get_xor_samples()
+vector<Sample1D> get_xor_samples()
 {
-	vector<Sample> samples;
-	samples.push_back(Sample(tensor_1d({0.0, 0.0}), tensor_1d(vector<double>({0.0}))));
-	samples.push_back(Sample(tensor_1d({0.0, 1.0}), tensor_1d(vector<double>({1.0}))));
-	samples.push_back(Sample(tensor_1d({1.0, 0.0}), tensor_1d(vector<double>({1.0}))));
-	samples.push_back(Sample(tensor_1d({1.0, 1.0}), tensor_1d(vector<double>({0.0}))));
+	vector<Sample1D> samples;
+	samples.push_back(Sample1D(tensor_1d({0.0, 0.0}), tensor_1d(vector<double>({0.0}))));
+	samples.push_back(Sample1D(tensor_1d({0.0, 1.0}), tensor_1d(vector<double>({1.0}))));
+	samples.push_back(Sample1D(tensor_1d({1.0, 0.0}), tensor_1d(vector<double>({1.0}))));
+	samples.push_back(Sample1D(tensor_1d({1.0, 1.0}), tensor_1d(vector<double>({0.0}))));
 	return samples;
 }
 

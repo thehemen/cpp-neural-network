@@ -3,7 +3,7 @@
 #ifndef ACTIVATION_H
 #define ACTIVATION_H
 
-enum ActivationType {SIGMOID, TANH, RELU};
+enum ActivationType {NONE, SIGMOID, TANH, RELU};
 
 class Activation
 {
@@ -32,7 +32,7 @@ public:
 				return max(0.0, arg);
 
 			default:
-				return 0.0;
+				return arg;
 		}
 	}
 
@@ -50,7 +50,7 @@ public:
 				return arg >= 0.0 ? 1.0 : 0.0;
 
 			default:
-				return 0.0;
+				return 1.0;
 		}
 	}
 };

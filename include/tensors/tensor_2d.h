@@ -34,6 +34,23 @@ public:
 		return vec.size();
 	}
 
+	int length()
+	{
+		return vec.size();
+	}
+
+	int width()
+	{
+		if(length() > 0)
+		{
+			return vec[0].size();
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
 	void make_zero()
 	{
 		for(int i = 0, n = vec.size(); i < n; ++i)
