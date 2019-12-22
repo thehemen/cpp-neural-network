@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8.9)
 project(cpp-neural-network)
 include_directories(include)
-file(GLOB SOURCES "src/*.cpp")
-add_executable(nn ${SOURCES})
+add_executable(xor src/xor.cpp)
+add_executable(mnist src/mnist.cpp)
 
 find_package(OpenMP)
 if (OPENMP_FOUND)

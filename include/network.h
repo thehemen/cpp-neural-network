@@ -53,20 +53,27 @@ class Network
 	string info;
 	tensor_1d outputs;
 public:
-	Network(vector<LayerDescription> layer_descrs, int in_width, int in_height)
+	Network(vector<LayerDescription> layer_descrs, map<string, int> params)
 	{
-		this->input_width = in_width;
-		this->input_height = in_height;
-
 		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
-		int input_count = 1;
-		int input_width = this->input_width;
-		int input_height = this->input_height;
-
 		stringstream ostream;
-		ostream << input_width << "x" << input_height << "\n";
+		int input_count = 1;
+		int input_width = 1;
+		int input_height = 1;
+
+		if(layer_descrs[0].layerType != "dense")
+		{
+			input_width = params["width"];
+			input_height = params["height"];
+			ostream << input_width << "x" << input_height << "\n";
+		}
+		else
+		{
+			input_count = params["count"];
+			ostream << input_count << "\n";
+		}
 
 		for(int i = 0, layer_len = layer_descrs.size(); i < layer_len; ++i)
 		{
@@ -186,7 +193,7 @@ public:
 		return info;
 	}
 
-	tensor_1d forward(tensor_3d inputs)
+	tensor_1d forward_2to1d(tensor_3d inputs)
 	{
 		tensor_3d tensor3d = inputs;
 
@@ -206,7 +213,20 @@ public:
 		return this->outputs;
 	}
 
-	tensor_3d backward(tensor_1d outputs_true)
+	tensor_1d forward_1to1d(tensor_1d inputs)
+	{
+		tensor_1d tensor1d = inputs;
+
+		for(int i = 0; i < layer1d_len; ++i)
+		{
+			tensor1d = layer1d_s[i]->forward(tensor1d);
+		}
+
+		this->outputs = tensor1d;
+		return this->outputs;
+	}
+
+	tensor_3d backward_1to2d(tensor_1d outputs_true)
 	{
 		int out_count = this->outputs.size();
 		tensor_1d tensor1d(out_count);
@@ -229,6 +249,24 @@ public:
 		}
 
 		return tensor3d;
+	}
+
+	tensor_1d backward_1to1d(tensor_1d outputs_true)
+	{
+		int out_count = this->outputs.size();
+		tensor_1d tensor1d(out_count);
+
+		for(int i = 0; i < out_count; ++i)
+		{
+			tensor1d[i] = this->outputs[i] - outputs_true[i];
+		}
+
+		for(int i = layer1d_len - 1; i >= 0; --i)
+		{
+			tensor1d = layer1d_s[i]->backward(tensor1d);
+		}
+
+		return tensor1d;
 	}
 
 	void fit(int t, AdamOptimizer& adam)

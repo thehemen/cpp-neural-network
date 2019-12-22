@@ -33,7 +33,7 @@ int main()
 	layers.push_back(LayerDescription("maxpooling2d", map<string, int>{{"width", 2}, {"height", 2}}));
 	layers.push_back(LayerDescription("flatten"));
 	layers.push_back(LayerDescription("dense", map<string, int>{{"length", 10}}, sigm));
-	Network network(layers, 28, 28);
+	Network network(layers, map<string, int>{{"width", 28}, {"height", 28}});
 
 	cout << network.get_shapes() << endl;
 	cout.precision(6);
@@ -45,8 +45,8 @@ int main()
 		for(int j = 0; j < train_num; ++j)
 		{
 			int t = i * train_num + j;
-			network.forward(train_samples[j].inputs);
-			network.backward(train_samples[j].outputs);
+			network.forward_2to1d(train_samples[j].inputs);
+			network.backward_1to2d(train_samples[j].outputs);
 			network.fit(t, adam);
 		}
 
@@ -55,7 +55,7 @@ int main()
 
 		for(int j = 0; j < test_num; ++j)
 		{
-			tensor_1d results = network.forward(test_samples[j].inputs);
+			tensor_1d results = network.forward_2to1d(test_samples[j].inputs);
 			loss += categorical_crossentropy(test_samples[j].outputs, results);
 			acc += categorical_accuracy(test_samples[j].outputs, results);
 		}
