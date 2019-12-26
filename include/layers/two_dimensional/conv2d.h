@@ -111,24 +111,42 @@ public:
 	tensor_3d backward(tensor_3d gradients_next)
 	{
 		gradients = tensor_3d(out_count, out_width, out_height);
-		vector<tensor_2d> gradient_back_list;
+		vector<tensor_2d> gradient_back_vec;
 
-		for(int i = 0; i < out_count; ++i)
+		for(int i = 0; i < input_count; ++i)
 		{
-			#pragma omp parallel for
-			for(int x = 0; x < out_width; ++x)
+			tensor_2d gradient_back_sum(input_width, input_height);
+
+			for(int j = 0; j < kernel_count; ++j)
 			{
-				for(int y = 0; y < out_height; ++y)
+				int index = i + j * input_count;
+
+				#pragma omp parallel for
+				for(int x = 0; x < out_width; ++x)
 				{
-					gradients[i][x][y] = activation.der(outputs[i][x][y], args[i][x][y]) * gradients_next[i][x][y];
+					for(int y = 0; y < out_height; ++y)
+					{
+						gradients[index][x][y] = activation.der(outputs[index][x][y], args[index][x][y]) * gradients_next[index][x][y];
+					}
+				}
+
+				gradients[index] = zeropadding2d(gradients[index], padding_width, padding_height);
+				tensor_2d gradient_back  = conv2d(gradients[index], rot180(kernel[j]));
+				
+				#pragma omp parallel for
+				for(int x = 0; x < input_width; ++x)
+				{
+					for(int y = 0; y < input_height; ++y)
+					{
+						gradient_back_sum[x][y] += gradient_back[x][y];
+					}
 				}
 			}
 
-			gradients[i] = zeropadding2d(gradients[i], padding_width, padding_height);
-			gradient_back_list.push_back(gradients[i]);
+			gradient_back_vec.push_back(gradient_back_sum);
 		}
 
-		tensor_3d gradients_back(gradient_back_list);
+		tensor_3d gradients_back(gradient_back_vec);
 		return gradients_back;
 	}
 

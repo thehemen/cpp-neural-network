@@ -29,7 +29,8 @@ int main()
 	int test_num = test_samples.size();
 
 	vector<LayerDescription> layers;
-	layers.push_back(LayerDescription("conv2d", map<string, int>{{"count", 4}, {"width", 3}, {"height", 3}}, tanh));
+	layers.push_back(LayerDescription("conv2d", map<string, int>{{"count", 2}, {"width", 3}, {"height", 3}}, tanh));
+	layers.push_back(LayerDescription("conv2d", map<string, int>{{"count", 3}, {"width", 3}, {"height", 3}}, tanh));
 	layers.push_back(LayerDescription("maxpooling2d", map<string, int>{{"width", 2}, {"height", 2}}));
 	layers.push_back(LayerDescription("flatten"));
 	layers.push_back(LayerDescription("dense", map<string, int>{{"length", 10}}, sigm));
