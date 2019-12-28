@@ -1,4 +1,4 @@
-#include <tensors/tensor_1d.h>
+#include <types.h>
 
 #ifndef LAYER_ONE_DIM_H
 #define LAYER_ONE_DIM_H

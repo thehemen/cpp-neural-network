@@ -1,7 +1,7 @@
 #include <omp.h>  // OpenMP headers
 #include <layers/one_dimensional/layer1d.h>
-#include <tensors/tensor_1d.h>
-#include <tensors/tensor_2d.h>
+#include <ops.h>
+#include <types.h>
 #include <activation.h>
 #include <adam_optimizer.h>
 
@@ -54,8 +54,8 @@ public:
 	tensor_1d forward(tensor_1d inputs) override
 	{
 		this->inputs = inputs;
-		args.make_zero();
-		outputs.make_zero();
+		make_zero(args);
+		make_zero(outputs);
 
 		#pragma omp parallel for
 		for(int i = 0; i < out_count; ++i)
@@ -78,8 +78,8 @@ public:
 
 	tensor_1d backward(tensor_1d errors_next) override
 	{
-		errors.make_zero();
-		errors_back.make_zero();
+		make_zero(errors);
+		make_zero(errors_back);
 
 		#pragma omp parallel for
 		for(int i = 0; i < out_count; ++i)

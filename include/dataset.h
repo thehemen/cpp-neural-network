@@ -1,8 +1,6 @@
 #include <vector>
 #include <fstream>
-#include <tensors/tensor_1d.h>
-#include <tensors/tensor_2d.h>
-#include <tensors/tensor_3d.h>
+#include <types.h>
 
 #ifndef DATASET_H
 #define DATASET_H
@@ -123,7 +121,7 @@ vector<Sample2to1D> get_mnist_samples(string images_full_path, string labels_ful
     for(int i = 0; i < number_of_images; ++i)
     {
         int x = 0, y = 0;
-        tensor_3d inputs(1, width, height);
+        tensor_3d inputs(1, tensor_2d(width, tensor_1d(height)));
 		tensor_1d outputs(10);
         
         for(int j = 0; j < image_size; ++j)

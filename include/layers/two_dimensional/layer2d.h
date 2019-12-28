@@ -1,4 +1,4 @@
-#include <tensors/tensor_2d.h>
+#include <types.h>
 
 #ifndef LAYER_TWO_DIM_H
 #define LAYER_TWO_DIM_H

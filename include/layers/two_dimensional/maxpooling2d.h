@@ -1,6 +1,7 @@
 #include <map>
 #include <omp.h>  // OpenMP headers
-#include <tensors/tensor_3d.h>
+#include <ops.h>
+#include <types.h>
 #include <layers/two_dimensional/layer2d.h>
 
 #ifndef MAXPOOLING_2D_H
@@ -38,15 +39,15 @@ public:
 		out_width = params["out_width"];
 		out_height = params["out_height"];
 
-		mask = tensor_3d(input_count, input_width, input_height);
-		outputs = tensor_3d(input_count, out_width, out_height);
-		gradient_back = tensor_3d(input_count, input_width, input_height);
+		mask = tensor_3d(input_count, tensor_2d(input_width, tensor_1d(input_height)));
+		outputs = tensor_3d(input_count, tensor_2d(out_width, tensor_1d(out_height)));
+		gradient_back = tensor_3d(input_count, tensor_2d(input_width, tensor_1d(input_height)));
 	}
 
 	tensor_3d forward(tensor_3d feature_map) override
 	{
-		mask.make_zero();
-		outputs.make_zero();
+		make_zero(mask);
+		make_zero(outputs);
 
 		#pragma omp parallel for
 		for(int i = 0; i < input_count; ++i)
@@ -87,7 +88,7 @@ public:
 
 	tensor_3d backward(tensor_3d gradients) override
 	{
-		gradient_back.make_zero();
+		make_zero(gradient_back);
 
 		#pragma omp parallel for
 		for(int i = 0; i < input_count; ++i)

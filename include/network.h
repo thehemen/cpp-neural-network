@@ -4,9 +4,7 @@
 
 #include <activation.h>
 #include <adam_optimizer.h>
-
-#include <tensors/tensor_1d.h>
-#include <tensors/tensor_2d.h>
+#include <types.h>
 
 #include <layers/one_dimensional/layer1d.h>
 #include <layers/one_dimensional/dense.h>
@@ -87,11 +85,11 @@ public:
 				int width = params["width"];
 				int height = params["height"];
 
-				tensor_3d kernel(count, width, height);
-				kernel.make_random();
+				tensor_3d kernel(count, tensor_2d(width, tensor_1d(height)));
+				make_random(kernel);
 
 				tensor_1d biases(count);
-				biases.make_random();
+				make_random(biases);
 
 				params["input_count"] = input_count;
 				params["input_width"] = input_width;
@@ -165,11 +163,11 @@ public:
 			{
 				int dense_out = params["length"];
 
-				tensor_2d weights(dense_out, input_count);
-				weights.make_random();
+				tensor_2d weights(dense_out, tensor_1d(input_count));
+				make_random(weights);
 
 				tensor_1d biases(dense_out);
-				biases.make_random();
+				make_random(biases);
 
 				params["input_count"] = input_count;
 

@@ -1,7 +1,6 @@
 #include <map>
 #include <omp.h>  // OpenMP headers
-#include <tensors/tensor_1d.h>
-#include <tensors/tensor_3d.h>
+#include <types.h>
 #include <layers/two_to_one_dim/layer2to1d.h>
 
 #ifndef FLATTEN_H
@@ -45,7 +44,7 @@ public:
 
 	tensor_3d backward(tensor_1d gradients)
 	{
-		tensor_3d feature_map(count, width, height);
+		tensor_3d feature_map(count, tensor_2d(width, tensor_1d(height)));
 
 		#pragma omp parallel for
 		for(int i = 0; i < count; ++i)

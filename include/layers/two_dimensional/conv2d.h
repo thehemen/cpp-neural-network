@@ -1,8 +1,7 @@
 #include <map>
 #include <omp.h>  // OpenMP headers
 #include <ops.h>
-#include <tensors/tensor_2d.h>
-#include <tensors/tensor_3d.h>
+#include <types.h>
 #include <layers/two_dimensional/layer2d.h>
 
 #ifndef CONV2D_H
@@ -70,8 +69,8 @@ public:
 		gradient_width = params["gradient_width"];
 		gradient_height = params["gradient_height"];
 
-		m_t = tensor_3d(kernel_count, kernel_width, kernel_height);
-		v_t = tensor_3d(kernel_count, kernel_width, kernel_height);
+		m_t = tensor_3d(kernel_count, tensor_2d(kernel_width, tensor_1d(kernel_height)));
+		v_t = tensor_3d(kernel_count, tensor_2d(kernel_width, tensor_1d(kernel_height)));
 	}
 
 	tensor_3d forward(tensor_3d feature_map)
@@ -89,7 +88,7 @@ public:
 		}
 
 	    outputs = tensor_3d(output_vec);
-		args = tensor_3d(out_count, out_width, out_height);
+		args = tensor_3d(out_count, tensor_2d(out_width, tensor_1d(out_height)));
 
 		#pragma omp parallel for
 		for(int i = 0; i < out_count; ++i)
@@ -110,12 +109,12 @@ public:
 
 	tensor_3d backward(tensor_3d gradients_next)
 	{
-		gradients = tensor_3d(out_count, out_width, out_height);
+		gradients = tensor_3d(out_count, tensor_2d(out_width, tensor_1d(out_height)));
 		vector<tensor_2d> gradient_back_vec;
 
 		for(int i = 0; i < input_count; ++i)
 		{
-			tensor_2d gradient_back_sum(input_width, input_height);
+			tensor_2d gradient_back_sum(input_width, tensor_1d(input_height));
 
 			for(int j = 0; j < kernel_count; ++j)
 			{
@@ -154,7 +153,7 @@ public:
 	{
 		for(int i = 0; i < kernel_count; ++i)
 		{
-			tensor_2d gradient_sum(gradient_width, gradient_height);
+			tensor_2d gradient_sum(gradient_width, tensor_1d(gradient_height));
 
 			for(int j = 0; j < input_count; ++j)
 			{
