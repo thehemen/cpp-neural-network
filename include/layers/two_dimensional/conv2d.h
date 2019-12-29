@@ -63,48 +63,39 @@ public:
 	tensor_3d forward(tensor_3d feature_map)
 	{
 		inputs = feature_map;
-		vector<tensor_2d> output_vec;
+		outputs = tensor_3d(kernel_count, tensor_2d(out_width, tensor_1d(out_height)));
 
 		for(int i = 0; i < kernel_count; ++i)
 		{
-			tensor_2d output_now(out_width, tensor_1d(out_height));
-
 			for(int j = 0; j < input_count; ++j)
 			{
-				conv2d(feature_map[j], kernel[i][j], output_now);
+				conv2d(feature_map[j], kernel[i][j], outputs[i]);
 			}
-
-			output_vec.push_back(output_now);
 		}
 
-	    outputs = tensor_3d(output_vec);
 		return outputs;
 	}
 
 	tensor_3d backward(tensor_3d gradients_next)
 	{
 		gradients = tensor_3d(kernel_count, tensor_2d(out_width, tensor_1d(out_height)));
-		vector<tensor_2d> gradient_back_vec;
 
 		for(int i = 0; i < kernel_count; ++i)
 		{
 			gradients[i] = zeropadding2d(gradients[i], padding_width, padding_height);
 		}
 
+		tensor_3d gradient_back(input_count, tensor_2d(input_width, tensor_1d(input_height)));
+
 		for(int i = 0; i < input_count; ++i)
 		{
-			tensor_2d gradient_back(input_width, tensor_1d(input_height));
-
 			for(int j = 0; j < kernel_count; ++j)
 			{
-				conv2d(gradients[j], rot180(kernel[j][i]), gradient_back);
+				conv2d(gradients[j], rot180(kernel[j][i]), gradient_back[i]);
 			}
-
-			gradient_back_vec.push_back(gradient_back);
 		}
 
-		tensor_3d gradients_back(gradient_back_vec);
-		return gradients_back;
+		return gradient_back;
 	}
 
 	void fit(int t, AdamOptimizer& adam)
