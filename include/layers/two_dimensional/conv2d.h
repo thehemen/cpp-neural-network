@@ -29,9 +29,6 @@ class Conv2D : public Layer2D
 	int padding_width;
 	int padding_height;
 
-	int gradient_width;
-	int gradient_height;
-
 	tensor_4d m_t;
 	tensor_4d v_t;
 
@@ -61,9 +58,6 @@ public:
 
 		padding_width = params["padding_width"];
 		padding_height = params["padding_height"];
-
-		gradient_width = params["gradient_width"];
-		gradient_height = params["gradient_height"];
 
 		m_t = tensor_4d(kernel_count, tensor_3d(input_count, tensor_2d(kernel_width, tensor_1d(kernel_height))));
 		v_t = tensor_4d(kernel_count, tensor_3d(input_count, tensor_2d(kernel_width, tensor_1d(kernel_height))));

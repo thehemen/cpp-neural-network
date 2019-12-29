@@ -105,9 +105,6 @@ public:
 				params["padding_width"] = input_width - out_width;
 				params["padding_height"] = input_height - out_height;
 
-				params["gradient_width"] = input_width + params["padding_width"];
-				params["gradient_height"] = input_height + params["padding_height"];
-
 				Conv2D* conv2d = new Conv2D(activation, kernel, biases, params);
 				layer2d_s.push_back(conv2d);
 
