@@ -6,7 +6,8 @@
 #include <adam_optimizer.h>
 #include <metrics.h>
 #include <status.h>
-#include <network.h>
+#include <network/network.h>
+#include <network/network_builder.h>
 
 using namespace std;
 
@@ -39,17 +40,17 @@ int main()
 	vector<Sample2to1D> test_samples = get_mnist_samples(test_images_path, test_labels_path);
 	int test_num = test_samples.size();
 
-	vector<LayerDescription> layers;
-	layers.push_back(LayerDescription("conv2d", map<string, int>{{"count", 2}, {"width", 3}, {"height", 3}}));
-	layers.push_back(LayerDescription("activation2d", tanh));
-	layers.push_back(LayerDescription("conv2d", map<string, int>{{"count", 3}, {"width", 3}, {"height", 3}}));
-	layers.push_back(LayerDescription("activation2d", tanh));
-	layers.push_back(LayerDescription("maxpooling2d", map<string, int>{{"width", 2}, {"height", 2}}));
-	layers.push_back(LayerDescription("flatten"));
-	layers.push_back(LayerDescription("dense", map<string, int>{{"length", 10}}));
-	layers.push_back(LayerDescription("activation1d", sigm));
-	Network network(layers, map<string, int>{{"width", 28}, {"height", 28}});
-	cout << network.get_shapes() << endl;
+	NetworkBuilder networkBuilder(28, 28);
+	networkBuilder.add("conv2d", map<string, int>{{"count", 2}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("activation2d", tanh);
+	networkBuilder.add("conv2d", map<string, int>{{"count", 3}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("activation2d", tanh);
+	networkBuilder.add("maxpooling2d", map<string, int>{{"width", 2}, {"height", 2}});
+	networkBuilder.add("flatten");
+	networkBuilder.add("dense", map<string, int>{{"length", 10}});
+	networkBuilder.add("activation1d", sigm);
+	Network network(networkBuilder.get_2d(), networkBuilder.get_2to1d(), networkBuilder.get_1d());
+	cout << networkBuilder.get_shapes() << endl;
 
 	Status status(iteration_step, precision, space_count);
 	status.initialize();

@@ -6,7 +6,8 @@
 #include <adam_optimizer.h>
 #include <metrics.h>
 #include <status.h>
-#include <network.h>
+#include <network/network.h>
+#include <network/network_builder.h>
 
 using namespace std;
 
@@ -32,11 +33,13 @@ int main()
 	vector<Sample1D> samples = get_xor_samples();
 	int sample_num = samples.size();
 
-	vector<LayerDescription> layers;
-	layers.push_back(LayerDescription("dense", map<string, int>{{"length", 8}}, tanh));
-	layers.push_back(LayerDescription("dense", map<string, int>{{"length", 1}}, sigm));
-	Network network(layers, map<string, int>{{"count", 2}});
-	cout << network.get_shapes() << endl;
+	NetworkBuilder networkBuilder(2);
+	networkBuilder.add("dense", map<string, int>{{"length", 8}});
+	networkBuilder.add("activation1d", tanh);
+	networkBuilder.add("dense", map<string, int>{{"length", 1}});
+	networkBuilder.add("activation1d", sigm);
+	Network network(networkBuilder.get_2d(), networkBuilder.get_2to1d(), networkBuilder.get_1d());
+	cout << networkBuilder.get_shapes() << endl;
 
 	Status status(iteration_step, precision, space_count);
 	status.initialize();
