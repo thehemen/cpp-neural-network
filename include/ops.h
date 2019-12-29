@@ -30,6 +30,14 @@ void make_random(tensor_3d &arr)
 	}
 }
 
+void make_random(tensor_4d &arr)
+{
+	for(int i = 0, length = arr.size(); i < length; ++i)
+	{
+		make_random(arr[i]);
+	}
+}
+
 void make_zero(tensor_1d &arr)
 {
 	fill(arr.begin(), arr.end(), 0.0);
@@ -44,6 +52,14 @@ void make_zero(tensor_2d &arr)
 }
 
 void make_zero(tensor_3d &arr)
+{
+	for(int i = 0, length = arr.size(); i < length; ++i)
+	{
+		make_zero(arr[i]);
+	}
+}
+
+void make_zero(tensor_4d &arr)
 {
 	for(int i = 0, length = arr.size(); i < length; ++i)
 	{

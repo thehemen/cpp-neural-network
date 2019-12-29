@@ -6,5 +6,6 @@
 typedef std::vector<double> tensor_1d;
 typedef std::vector<tensor_1d> tensor_2d;
 typedef std::vector<tensor_2d> tensor_3d;
+typedef std::vector<tensor_3d> tensor_4d;
 
 #endif

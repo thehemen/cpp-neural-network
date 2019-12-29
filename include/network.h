@@ -85,7 +85,7 @@ public:
 				int width = params["width"];
 				int height = params["height"];
 
-				tensor_3d kernel(count, tensor_2d(width, tensor_1d(height)));
+				tensor_4d kernel(count, tensor_3d(input_count, tensor_2d(width, tensor_1d(height))));
 				make_random(kernel);
 
 				tensor_1d biases(count);
@@ -95,11 +95,10 @@ public:
 				params["input_width"] = input_width;
 				params["input_height"] = input_height;
 
-				int out_count = input_count * count;
+				int out_count = count;
 				int out_width = input_width - width + 1;
 				int out_height = input_height - height + 1;
 
-				params["out_count"] = out_count;
 				params["out_width"] = out_width;
 				params["out_height"] = out_height;
 
