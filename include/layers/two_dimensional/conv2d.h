@@ -69,7 +69,7 @@ public:
 		{
 			for(int j = 0; j < input_count; ++j)
 			{
-				conv2d(feature_map[j], kernel[i][j], outputs[i]);
+				conv2d(feature_map[j], kernel[i][j], outputs[i], bias[i]);
 			}
 		}
 
