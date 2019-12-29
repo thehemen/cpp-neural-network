@@ -2,7 +2,6 @@
 #include <layers/one_dimensional/layer1d.h>
 #include <ops.h>
 #include <types.h>
-#include <activation.h>
 #include <adam_optimizer.h>
 
 #ifndef DENSE_H
@@ -12,7 +11,6 @@ using namespace std;
 
 class Dense : public Layer1D
 {
-	Activation activation;
 	int input_count;
 	int out_count;
 
@@ -23,17 +21,15 @@ class Dense : public Layer1D
 	tensor_1d v_t;
 
 	tensor_1d inputs;
-	tensor_1d args;
 	tensor_1d outputs;
 
-	tensor_1d errors;
-	tensor_1d errors_back;
+	tensor_1d gradients;
+	tensor_1d gradients_back;
 public:
 	Dense() : Layer1D() {}
 
-	Dense(Activation activation, tensor_2d weights, tensor_1d biases, map<string, int> params)
+	Dense(tensor_2d weights, tensor_1d biases, map<string, int> params)
 	{
-		this->activation = activation;
 		this->weights = weights;
 		this->biases = biases;
 
@@ -44,17 +40,15 @@ public:
 		v_t = tensor_1d(out_count);
 
 		inputs = tensor_1d(input_count);
-		args = tensor_1d(out_count);
 		outputs = tensor_1d(out_count);
 
-		errors = tensor_1d(out_count);
-		errors_back = tensor_1d(input_count);
+		gradients = tensor_1d(out_count);
+		gradients_back = tensor_1d(input_count);
 	}
 
 	tensor_1d forward(tensor_1d inputs) override
 	{
 		this->inputs = inputs;
-		make_zero(args);
 		make_zero(outputs);
 
 		#pragma omp parallel for
@@ -68,24 +62,16 @@ public:
 			}
 
 			sum += biases[i];
-			
-			args[i] = sum;
-			outputs[i] = activation.get(sum);
+			outputs[i] = sum;
 		}
 
 		return outputs;
 	}
 
-	tensor_1d backward(tensor_1d errors_next) override
+	tensor_1d backward(tensor_1d gradients) override
 	{
-		make_zero(errors);
-		make_zero(errors_back);
-
-		#pragma omp parallel for
-		for(int i = 0; i < out_count; ++i)
-		{
-			errors[i] = activation.der(outputs[i], args[i]) * errors_next[i];
-		}
+		this->gradients = gradients;
+		make_zero(gradients_back);
 
 		#pragma omp parallel for
 		for(int j = 0; j < input_count; ++j)
@@ -94,13 +80,13 @@ public:
 
 			for(int i = 0; i < out_count; ++i)
 			{
-				sum += weights[i][j] * errors[i];
+				sum += weights[i][j] * gradients[i];
 			}
 
-			errors_back[j] = sum;
+			gradients_back[j] = sum;
 		}
 
-		return errors_back;
+		return gradients_back;
 	}
 
 	void fit(int t, AdamOptimizer& adam) override
@@ -108,7 +94,7 @@ public:
 		#pragma omp parallel for
 		for(int i = 0; i < out_count; ++i)
 		{
-			double update = adam.optimize(t, m_t[i], v_t[i], errors[i]);
+			double update = adam.optimize(t, m_t[i], v_t[i], gradients[i]);
 
 			for(int j = 0; j < input_count; ++j)
 			{

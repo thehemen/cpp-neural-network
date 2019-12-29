@@ -11,7 +11,6 @@ using namespace std;
 
 class Conv2D : public Layer2D
 {
-	Activation activation;
 	tensor_4d kernel;
 	tensor_1d bias;
 
@@ -34,14 +33,12 @@ class Conv2D : public Layer2D
 
 	tensor_3d inputs;
 	tensor_3d gradients;
-	tensor_3d args;
 	tensor_3d outputs;
 public:
 	Conv2D() {}
 
-	Conv2D(Activation activation, tensor_4d kernel, tensor_1d bias, map<string, int> params)
+	Conv2D(tensor_4d kernel, tensor_1d bias, map<string, int> params)
 	{
-		this->activation = activation;
 		this->kernel = kernel;
 		this->bias = bias;
 
@@ -81,22 +78,6 @@ public:
 		}
 
 	    outputs = tensor_3d(output_vec);
-		args = tensor_3d(kernel_count, tensor_2d(out_width, tensor_1d(out_height)));
-
-		#pragma omp parallel for
-		for(int i = 0; i < kernel_count; ++i)
-		{
-			for(int x = 0; x < out_width; ++x)
-			{
-				for(int y = 0; y < out_height; ++y)
-				{
-					double argument = outputs[i][x][y] + bias[i];
-					args[i][x][y] = argument;
-					outputs[i][x][y] = activation.get(argument);
-				}
-			}
-		}
-
 		return outputs;
 	}
 
@@ -107,15 +88,6 @@ public:
 
 		for(int i = 0; i < kernel_count; ++i)
 		{
-			#pragma omp parallel for
-			for(int x = 0; x < out_width; ++x)
-			{
-				for(int y = 0; y < out_height; ++y)
-				{
-					gradients[i][x][y] = activation.der(outputs[i][x][y], args[i][x][y]) * gradients_next[i][x][y];
-				}
-			}
-
 			gradients[i] = zeropadding2d(gradients[i], padding_width, padding_height);
 		}
 

@@ -8,6 +8,7 @@
 
 #include <layers/one_dimensional/layer1d.h>
 #include <layers/one_dimensional/dense.h>
+#include <layers/one_dimensional/activation1d.h>
 
 #include <layers/two_to_one_dim/layer2to1d.h>
 #include <layers/two_to_one_dim/flatten.h>
@@ -15,6 +16,7 @@
 #include <layers/two_dimensional/layer2d.h>
 #include <layers/two_dimensional/conv2d.h>
 #include <layers/two_dimensional/maxpooling2d.h>
+#include <layers/two_dimensional/activation2d.h>
 
 #ifndef NETWORK_H
 #define NETWORK_H
@@ -27,7 +29,25 @@ struct LayerDescription
 	map<string, int> params;
 	Activation activation;
 
-	LayerDescription(string layerType, map<string, int> params = map<string, int>(), Activation activation = Activation(ActivationType::NONE))
+	LayerDescription(string layerType)
+	{
+		this->layerType = layerType;
+		this->params = params;
+	}
+
+	LayerDescription(string layerType, map<string, int> params)
+	{
+		this->layerType = layerType;
+		this->params = params;
+	}
+
+	LayerDescription(string layerType, Activation activation)
+	{
+		this->layerType = layerType;
+		this->activation = activation;
+	}
+
+	LayerDescription(string layerType, map<string, int> params, Activation activation)
 	{
 		this->layerType = layerType;
 		this->params = params;
@@ -105,7 +125,7 @@ public:
 				params["padding_width"] = input_width - out_width;
 				params["padding_height"] = input_height - out_height;
 
-				Conv2D* conv2d = new Conv2D(activation, kernel, biases, params);
+				Conv2D* conv2d = new Conv2D(kernel, biases, params);
 				layer2d_s.push_back(conv2d);
 
 				input_count = out_count;
@@ -139,6 +159,15 @@ public:
 				ostream << input_count << "x" << input_width << "x" << input_height;
 				ostream << "\tMaxPooling2D\n";
 			}
+			else if(layerType == "activation2d")
+			{
+				params["out_count"] = input_count;
+				params["out_width"] = input_width;
+				params["out_height"] = input_height;
+
+				Activation2D* activation2d = new Activation2D(activation, params);
+				layer2d_s.push_back(activation2d);
+			}
 			else if(layerType == "flatten")
 			{
 				params["count"] = input_count;
@@ -157,23 +186,29 @@ public:
 			}
 			else if(layerType == "dense")
 			{
-				int dense_out = params["length"];
+				int out_count = params["length"];
 
-				tensor_2d weights(dense_out, tensor_1d(input_count));
+				tensor_2d weights(out_count, tensor_1d(input_count));
 				make_random(weights);
 
-				tensor_1d biases(dense_out);
+				tensor_1d biases(out_count);
 				make_random(biases);
 
 				params["input_count"] = input_count;
 
-				Dense* dense = new Dense(activation, weights, biases, params);
+				Dense* dense = new Dense(weights, biases, params);
 				layer1d_s.push_back(dense);
 
-				input_count = dense_out;
+				input_count = out_count;
 
 				ostream << input_count;
 				ostream << "\tDense\n";
+			}
+			else if(layerType == "activation1d")
+			{
+				params["out_count"] = input_count;
+				Activation1D* activation1d = new Activation1D(activation, params);
+				layer1d_s.push_back(activation1d);
 			}
 		}
 
