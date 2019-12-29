@@ -80,16 +80,7 @@ public:
 
 			for(int j = 0; j < input_count; ++j)
 			{
-				tensor_2d output_one = conv2d(feature_map[j], kernel[i][j]);
-				
-				#pragma omp parallel for
-				for(int x = 0; x < out_width; ++x)
-				{
-					for(int y = 0; y < out_height; ++y)
-					{
-						output_now[x][y] += output_one[x][y];
-					}
-				}
+				conv2d(feature_map[j], kernel[i][j], output_now);
 			}
 
 			output_vec.push_back(output_now);
@@ -136,23 +127,14 @@ public:
 
 		for(int i = 0; i < input_count; ++i)
 		{
-			tensor_2d gradient_back_sum(input_width, tensor_1d(input_height));
+			tensor_2d gradient_back(input_width, tensor_1d(input_height));
 
 			for(int j = 0; j < kernel_count; ++j)
 			{
-				tensor_2d gradient_back  = conv2d(gradients[j], rot180(kernel[j][i]));
-				
-				#pragma omp parallel for
-				for(int x = 0; x < input_width; ++x)
-				{
-					for(int y = 0; y < input_height; ++y)
-					{
-						gradient_back_sum[x][y] += gradient_back[x][y];
-					}
-				}
+				conv2d(gradients[j], rot180(kernel[j][i]), gradient_back);
 			}
 
-			gradient_back_vec.push_back(gradient_back_sum);
+			gradient_back_vec.push_back(gradient_back);
 		}
 
 		tensor_3d gradients_back(gradient_back_vec);
@@ -165,7 +147,9 @@ public:
 		{
 			for(int j = 0; j < input_count; ++j)
 			{
-				tensor_2d gradient_now = rot180(conv2d(gradients[i], inputs[j]));
+				tensor_2d gradient_now(kernel_width, tensor_1d(kernel_height));
+				conv2d(gradients[i], inputs[j], gradient_now);
+				gradient_now = rot180(gradient_now);
 
 				#pragma omp parallel for
 				for(int x = 0; x < kernel_width; ++x)

@@ -107,7 +107,7 @@ tensor_2d rot180(tensor_2d inputs)
 	return outputs;
 }
 
-tensor_2d conv2d(tensor_2d image, tensor_2d kernel)
+tensor_2d conv2d(tensor_2d image, tensor_2d kernel, tensor_2d &out)
 {
 	int image_width = image.size();
 	int image_height = image[0].size();
@@ -118,20 +118,22 @@ tensor_2d conv2d(tensor_2d image, tensor_2d kernel)
 	int out_width = image_width - kernel_width + 1;
 	int out_height = image_height - kernel_height + 1;
 
-    tensor_2d out(out_width, tensor_1d(out_height));
-
     #pragma omp parallel for
     for(int x = 0; x < out_width; ++x)
     {
         for(int y = 0; y < out_height; ++y)
         {
+            double acc = 0.0;
+
             for(int k_x = 0; k_x < kernel_width; ++k_x)
             {
                 for(int k_y = 0; k_y < kernel_height; ++k_y)
                 {
-                    out[x][y] += image[x + k_x][y + k_y] * kernel[k_x][k_y];
+                    acc += image[x + k_x][y + k_y] * kernel[k_x][k_y];
                 }
             }
+
+            out[x][y] += acc;
         }
     }
 
