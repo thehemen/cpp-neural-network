@@ -41,14 +41,14 @@ int main()
 	int test_num = test_samples.size();
 
 	NetworkBuilder networkBuilder(28, 28);
-	networkBuilder.add("conv2d", map<string, int>{{"count", 2}, {"width", 3}, {"height", 3}});
-	networkBuilder.add("activation2d", tanh);
-	networkBuilder.add("conv2d", map<string, int>{{"count", 3}, {"width", 3}, {"height", 3}});
-	networkBuilder.add("activation2d", tanh);
-	networkBuilder.add("maxpooling2d", map<string, int>{{"width", 2}, {"height", 2}});
-	networkBuilder.add("flatten");
-	networkBuilder.add("dense", map<string, int>{{"length", 10}});
-	networkBuilder.add("activation1d", sigm);
+	networkBuilder.add("Conv2D", map<string, int>{{"count", 2}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Activation2D", tanh);
+	networkBuilder.add("Conv2D", map<string, int>{{"count", 3}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Activation2D", tanh);
+	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
+	networkBuilder.add("Flatten");
+	networkBuilder.add("Dense", map<string, int>{{"length", 10}});
+	networkBuilder.add("Activation1D", sigm);
 	Network network(networkBuilder.get_2d(), networkBuilder.get_2to1d(), networkBuilder.get_1d());
 	cout << networkBuilder.get_shapes() << endl;
 

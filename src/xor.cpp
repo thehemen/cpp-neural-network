@@ -34,10 +34,10 @@ int main()
 	int sample_num = samples.size();
 
 	NetworkBuilder networkBuilder(2);
-	networkBuilder.add("dense", map<string, int>{{"length", 8}});
-	networkBuilder.add("activation1d", tanh);
-	networkBuilder.add("dense", map<string, int>{{"length", 1}});
-	networkBuilder.add("activation1d", sigm);
+	networkBuilder.add("Dense", map<string, int>{{"length", 8}});
+	networkBuilder.add("Activation1D", tanh);
+	networkBuilder.add("Dense", map<string, int>{{"length", 1}});
+	networkBuilder.add("Activation1D", sigm);
 	Network network(networkBuilder.get_2d(), networkBuilder.get_2to1d(), networkBuilder.get_1d());
 	cout << networkBuilder.get_shapes() << endl;
 

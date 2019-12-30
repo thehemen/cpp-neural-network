@@ -79,7 +79,7 @@ public:
 
 	void add(string layerType)
 	{
-		if(layerType == "flatten")
+		if(layerType == "Flatten")
 		{
 			flatten();
 		}
@@ -87,15 +87,15 @@ public:
 
 	void add(string layerType, map<string, int> params)
 	{
-		if(layerType == "conv2d")
+		if(layerType == "Conv2D")
 		{
 			conv2d(params);
 		}
-		else if(layerType == "maxpooling2d")
+		else if(layerType == "MaxPooling2D")
 		{
 			maxpooling2d(params);
 		}
-		else if(layerType == "dense")
+		else if(layerType == "Dense")
 		{
 			dense(params);
 		}
@@ -103,11 +103,11 @@ public:
 
 	void add(string layerType, Activation activation)
 	{
-		if(layerType == "activation2d")
+		if(layerType == "Activation2D")
 		{
 			activation2d(activation);
 		}
-		else if(layerType == "activation1d")
+		else if(layerType == "Activation1D")
 		{
 			activation1d(activation);
 		}
