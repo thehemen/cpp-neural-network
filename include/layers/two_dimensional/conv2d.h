@@ -78,7 +78,7 @@ public:
 
 	tensor_3d backward(tensor_3d gradients_next)
 	{
-		gradients = tensor_3d(kernel_count, tensor_2d(out_width, tensor_1d(out_height)));
+		gradients = gradients_next;
 
 		for(int i = 0; i < kernel_count; ++i)
 		{
