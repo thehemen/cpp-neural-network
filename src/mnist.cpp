@@ -26,7 +26,7 @@ int main()
 	const int precision = 6;
 	const int space_count = 100;
 
-	Activation tanh(ActivationType::TANH);
+	Activation relu(ActivationType::RELU);
 	Activation sigm(ActivationType::SIGMOID, 1.0);
 	AdamOptimizer adam(learning_rate, beta_1, beta_2, epsilon);
 
@@ -40,11 +40,13 @@ int main()
 	vector<Sample2to1D> test_samples = get_mnist_samples(test_images_path, test_labels_path);
 	int test_num = test_samples.size();
 
+	// LeNet5-like network
 	NetworkBuilder networkBuilder(28, 28);
-	networkBuilder.add("Conv2D", map<string, int>{{"count", 2}, {"width", 3}, {"height", 3}});
-	networkBuilder.add("Activation2D", tanh);
-	networkBuilder.add("Conv2D", map<string, int>{{"count", 3}, {"width", 3}, {"height", 3}});
-	networkBuilder.add("Activation2D", tanh);
+	networkBuilder.add("SeparableConv2D", map<string, int>{{"count", 6}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Activation2D", relu);
+	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
+	networkBuilder.add("SeparableConv2D", map<string, int>{{"count", 16}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Activation2D", relu);
 	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
 	networkBuilder.add("Flatten");
 	networkBuilder.add("Dense", map<string, int>{{"length", 10}});

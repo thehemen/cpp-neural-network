@@ -14,6 +14,7 @@
 
 #include <layers/two_dimensional/layer2d.h>
 #include <layers/two_dimensional/conv2d.h>
+#include <layers/two_dimensional/separableconv2d.h>
 #include <layers/two_dimensional/maxpooling2d.h>
 #include <layers/two_dimensional/activation2d.h>
 
@@ -42,7 +43,7 @@ public:
 		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
-		ostream << input_count << "\n";
+		ostream << "\t\t" << input_count << "\n";
 	}
 
 	NetworkBuilder(int width, int height)
@@ -54,7 +55,7 @@ public:
 		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
-		ostream << input_width << "x" << input_height << "\n";
+		ostream << "\t\t" << input_width << "x" << input_height << "\n";
 	}
 
 	string get_shapes()
@@ -90,6 +91,10 @@ public:
 		if(layerType == "Conv2D")
 		{
 			conv2d(params);
+		}
+		else if(layerType == "SeparableConv2D")
+		{
+			separableconv2d(params);
 		}
 		else if(layerType == "MaxPooling2D")
 		{
@@ -144,8 +149,45 @@ private:
 		input_width = out_width;
 		input_height = out_height;
 
-		ostream << input_count << "x" << input_width << "x" << input_height;
-		ostream << "\tConv2D\n";
+		ostream << left << setw(16) << "Conv2D";
+		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
+	}
+
+	void separableconv2d(map<string, int> params)
+	{
+		int kernel_count = params["count"];
+		int kernel_width = params["width"];
+		int kernel_height = params["height"];
+
+		tensor_4d depthwise_kernel(input_count, tensor_3d(1, tensor_2d(kernel_width, tensor_1d(kernel_height))));
+		tensor_4d pointwise_kernel(kernel_count, tensor_3d(input_count, tensor_2d(1, tensor_1d(1))));
+
+		make_random(depthwise_kernel);
+		make_random(pointwise_kernel);
+
+		params["input_count"] = input_count;
+		params["input_width"] = input_width;
+		params["input_height"] = input_height;
+
+		int out_count = kernel_count;
+		int out_width = input_width - kernel_width + 1;
+		int out_height = input_height - kernel_height + 1;
+
+		params["out_width"] = out_width;
+		params["out_height"] = out_height;
+
+		params["padding_width"] = input_width - out_width;
+		params["padding_height"] = input_height - out_height;
+
+		SeparableConv2D* separableconv2d = new SeparableConv2D(depthwise_kernel, pointwise_kernel, params);
+		layer2d_s.push_back(separableconv2d);
+
+		input_count = out_count;
+		input_width = out_width;
+		input_height = out_height;
+
+		ostream << left << setw(16) << "SeparableConv2D";
+		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
 	void maxpooling2d(map<string, int> params)
@@ -169,8 +211,8 @@ private:
 		input_width = out_width;
 		input_height = out_height;
 
-		ostream << input_count << "x" << input_width << "x" << input_height;
-		ostream << "\tMaxPooling2D\n";
+		ostream << left << setw(16) << "MaxPooling2D";
+		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
 	void activation2d(Activation activation)
@@ -198,8 +240,8 @@ private:
 		input_width = 1;
 		input_height = 1;
 
-		ostream << input_count;
-		ostream << "\tFlatten\n";
+		ostream << left << setw(16) << "Flatten";
+		ostream << input_count << "\n";
 	}
 
 	void dense(map<string, int> params)
@@ -219,8 +261,8 @@ private:
 
 		input_count = out_count;
 
-		ostream << input_count;
-		ostream << "\tDense\n";
+		ostream << left << setw(16) << "Dense";
+		ostream << input_count << "\n";
 	}
 
 	void activation1d(Activation activation)
