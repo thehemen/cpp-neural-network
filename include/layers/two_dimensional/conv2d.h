@@ -12,7 +12,6 @@ using namespace std;
 class Conv2D : public Layer2D
 {
 	tensor_4d kernel;
-	tensor_1d bias;
 
 	int kernel_count;
 	int kernel_width;
@@ -28,8 +27,8 @@ class Conv2D : public Layer2D
 	int padding_width;
 	int padding_height;
 
-	tensor_4d m_t;
-	tensor_4d v_t;
+	tensor_4d Mt;
+	tensor_4d Vt;
 
 	tensor_3d inputs;
 	tensor_3d gradients;
@@ -37,10 +36,9 @@ class Conv2D : public Layer2D
 public:
 	Conv2D() {}
 
-	Conv2D(tensor_4d kernel, tensor_1d bias, map<string, int> params)
+	Conv2D(tensor_4d kernel, map<string, int> params)
 	{
 		this->kernel = kernel;
-		this->bias = bias;
 
 		kernel_count = params["count"];
 		kernel_width = params["width"];
@@ -56,8 +54,8 @@ public:
 		padding_width = params["padding_width"];
 		padding_height = params["padding_height"];
 
-		m_t = tensor_4d(kernel_count, tensor_3d(input_count, tensor_2d(kernel_width, tensor_1d(kernel_height))));
-		v_t = tensor_4d(kernel_count, tensor_3d(input_count, tensor_2d(kernel_width, tensor_1d(kernel_height))));
+		Mt = tensor_4d(kernel_count, tensor_3d(input_count, tensor_2d(kernel_width, tensor_1d(kernel_height))));
+		Vt = tensor_4d(kernel_count, tensor_3d(input_count, tensor_2d(kernel_width, tensor_1d(kernel_height))));
 	}
 
 	tensor_3d forward(tensor_3d feature_map)
@@ -69,7 +67,7 @@ public:
 		{
 			for(int j = 0; j < input_count; ++j)
 			{
-				conv2d(feature_map[j], kernel[i][j], outputs[i], bias[i]);
+				conv2d(feature_map[j], kernel[i][j], outputs[i]);
 			}
 		}
 
@@ -113,9 +111,8 @@ public:
 				{
 					for(int y = 0; y < kernel_height; ++y)
 					{
-						double update = adam.optimize(t, m_t[i][j][x][y], v_t[i][j][x][y], gradient_now[x][y]);
+						double update = adam.optimize(t, Mt[i][j][x][y], Vt[i][j][x][y], gradient_now[x][y]);
 						kernel[i][j][x][y] += update;
-						bias[i] += update;
 					}
 				}
 			}

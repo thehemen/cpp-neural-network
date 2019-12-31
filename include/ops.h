@@ -107,7 +107,7 @@ tensor_2d rot180(tensor_2d inputs)
 	return outputs;
 }
 
-tensor_2d conv2d(tensor_2d image, tensor_2d kernel, tensor_2d &out, double bias = 0.0)
+tensor_2d conv2d(tensor_2d image, tensor_2d kernel, tensor_2d &out)
 {
 	int image_width = image.size();
 	int image_height = image[0].size();
@@ -133,7 +133,6 @@ tensor_2d conv2d(tensor_2d image, tensor_2d kernel, tensor_2d &out, double bias 
                 }
             }
 
-            acc += bias;
             out[x][y] += acc;
         }
     }

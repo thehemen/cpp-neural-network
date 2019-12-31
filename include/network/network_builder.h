@@ -121,10 +121,7 @@ private:
 		int height = params["height"];
 
 		tensor_4d kernel(count, tensor_3d(input_count, tensor_2d(width, tensor_1d(height))));
-		tensor_1d biases(count);
-
 		make_random(kernel);
-		make_random(biases);
 
 		params["input_count"] = input_count;
 		params["input_width"] = input_width;
@@ -140,7 +137,7 @@ private:
 		params["padding_width"] = input_width - out_width;
 		params["padding_height"] = input_height - out_height;
 
-		Conv2D* conv2d = new Conv2D(kernel, biases, params);
+		Conv2D* conv2d = new Conv2D(kernel, params);
 		layer2d_s.push_back(conv2d);
 
 		input_count = out_count;
