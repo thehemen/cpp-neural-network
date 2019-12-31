@@ -20,7 +20,7 @@ int main()
 	const double beta_2 = 0.999;
 	const double epsilon = 1e-9;
 
-	const int epochs = 10000;
+	const int epochs = 1000;
 
 	const int iteration_step = 1;
 	const int precision = 6;
@@ -57,7 +57,7 @@ int main()
 		double loss = 0.0;
 		double acc = 0.0;
 
-		if((i + 1) % 500 == 0)
+		if(i == 0 || (i + 1) % 50 == 0)
 		{
 			for(int j = 0; j < sample_num; ++j)
 			{

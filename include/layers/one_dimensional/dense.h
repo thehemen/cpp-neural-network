@@ -17,8 +17,11 @@ class Dense : public Layer1D
 	tensor_2d weights;
 	tensor_1d biases;
 
-	tensor_1d m_t;
-	tensor_1d v_t;
+	tensor_2d Mt;
+	tensor_2d Vt;
+
+	tensor_1d bias_Mt;
+	tensor_1d bias_Vt;
 
 	tensor_1d inputs;
 	tensor_1d outputs;
@@ -36,8 +39,11 @@ public:
 		input_count = params["input_count"];
 		out_count = params["length"];
 
-		m_t = tensor_1d(out_count);
-		v_t = tensor_1d(out_count);
+		Mt = tensor_2d(out_count, tensor_1d(input_count));
+		Vt = tensor_2d(out_count, tensor_1d(input_count));
+
+		bias_Mt = tensor_1d(out_count);
+		bias_Vt = tensor_1d(out_count);
 
 		inputs = tensor_1d(input_count);
 		outputs = tensor_1d(out_count);
@@ -94,14 +100,13 @@ public:
 		#pragma omp parallel for
 		for(int i = 0; i < out_count; ++i)
 		{
-			double update = adam.optimize(t, m_t[i], v_t[i], gradients[i]);
-
 			for(int j = 0; j < input_count; ++j)
 			{
-				weights[i][j] += inputs[j] * update;
+				double gradient_now = inputs[j] * gradients[i];
+				weights[i][j] += adam.optimize(t, Mt[i][j], Vt[i][j], gradient_now);
 			}
 
-			biases[i] += update;
+			biases[i] += adam.optimize(t, bias_Mt[i], bias_Vt[i], gradients[i]);
 		}
 	}
 };
