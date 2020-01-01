@@ -6,35 +6,38 @@
 #ifndef OPS_H
 #define OPS_H
 
-void make_random(tensor_1d &arr)
+// Xavier weight initialization.
+// Weights are taken randomly within [-1/sqrt(n); 1/sqrt(n)],
+// where n is the number of input units.
+void make_random(tensor_1d &arr, double max_range)
 {
 	for(int i = 0, length = arr.size(); i < length; ++i)
 	{
-		arr[i] = (double)rand() / RAND_MAX - 0.5;
+		arr[i] = max_range * (double)rand() / RAND_MAX - max_range * 0.5;
 	}
 }
 
-void make_random(tensor_2d &arr)
+void make_random(tensor_2d &arr, double max_range)
 {
 	for(int i = 0, length = arr.size(); i < length; ++i)
 	{
-		make_random(arr[i]);
+		make_random(arr[i], max_range);
 	}
 }
 
-void make_random(tensor_3d &arr)
+void make_random(tensor_3d &arr, double max_range)
 {
 	for(int i = 0, length = arr.size(); i < length; ++i)
 	{
-		make_random(arr[i]);
+		make_random(arr[i], max_range);
 	}
 }
 
-void make_random(tensor_4d &arr)
+void make_random(tensor_4d &arr, double max_range)
 {
 	for(int i = 0, length = arr.size(); i < length; ++i)
 	{
-		make_random(arr[i]);
+		make_random(arr[i], max_range);
 	}
 }
 

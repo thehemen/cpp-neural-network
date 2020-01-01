@@ -42,10 +42,10 @@ int main()
 
 	// LeNet5-like network
 	NetworkBuilder networkBuilder(28, 28);
-	networkBuilder.add("SeparableConv2D", map<string, int>{{"count", 6}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Conv2D", map<string, int>{{"count", 6}, {"width", 3}, {"height", 3}});
 	networkBuilder.add("Activation2D", relu);
 	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
-	networkBuilder.add("SeparableConv2D", map<string, int>{{"count", 16}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Conv2D", map<string, int>{{"count", 16}, {"width", 3}, {"height", 3}});
 	networkBuilder.add("Activation2D", relu);
 	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
 	networkBuilder.add("Flatten");

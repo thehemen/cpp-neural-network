@@ -1,5 +1,6 @@
 #include <vector>
 #include <sstream>
+#include <cmath>
 #include <map>
 
 #include <activation.h>
@@ -126,7 +127,7 @@ private:
 		int height = params["height"];
 
 		tensor_4d kernel(count, tensor_3d(input_count, tensor_2d(width, tensor_1d(height))));
-		make_random(kernel);
+		make_random(kernel, 1.0 / sqrt(input_count * width * height));
 
 		params["input_count"] = input_count;
 		params["input_width"] = input_width;
@@ -162,8 +163,8 @@ private:
 		tensor_4d depthwise_kernel(input_count, tensor_3d(1, tensor_2d(kernel_width, tensor_1d(kernel_height))));
 		tensor_4d pointwise_kernel(kernel_count, tensor_3d(input_count, tensor_2d(1, tensor_1d(1))));
 
-		make_random(depthwise_kernel);
-		make_random(pointwise_kernel);
+		make_random(depthwise_kernel, 1.0 / sqrt(kernel_width * kernel_height));
+		make_random(pointwise_kernel, 1.0 / sqrt(input_count));
 
 		params["input_count"] = input_count;
 		params["input_width"] = input_width;
@@ -251,8 +252,8 @@ private:
 		tensor_2d weights(out_count, tensor_1d(input_count));
 		tensor_1d biases(out_count);
 
-		make_random(weights);
-		make_random(biases);
+		make_random(weights, 1.0 / sqrt(input_count));
+		make_random(biases, 1.0);
 
 		params["input_count"] = input_count;
 
