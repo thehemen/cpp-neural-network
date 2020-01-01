@@ -9,6 +9,7 @@
 #include <layers/one_dimensional/layer1d.h>
 #include <layers/one_dimensional/dense.h>
 #include <layers/one_dimensional/activation1d.h>
+#include <layers/one_dimensional/softmax.h>
 
 #include <layers/two_to_one_dim/layer2to1d.h>
 #include <layers/two_to_one_dim/flatten.h>
@@ -84,6 +85,10 @@ public:
 		if(layerType == "Flatten")
 		{
 			flatten();
+		}
+		else if(layerType == "Softmax")
+		{
+			softmax();
 		}
 	}
 
@@ -272,6 +277,14 @@ private:
 		params["out_count"] = input_count;
 		Activation1D* activation1d = new Activation1D(activation, params);
 		layer1d_s.push_back(activation1d);
+	}
+
+	void softmax()
+	{
+		map<string, int> params;
+		params["out_count"] = input_count;
+		Softmax* softmax = new Softmax(params);
+		layer1d_s.push_back(softmax);
 	}
 };
 

@@ -27,7 +27,6 @@ int main()
 	const int space_count = 100;
 
 	Activation relu(ActivationType::RELU);
-	Activation sigm(ActivationType::SIGMOID, 1.0);
 	AdamOptimizer adam(learning_rate, beta_1, beta_2, epsilon);
 
 	string train_images_path = "../mnist/train-images-idx3-ubyte";
@@ -40,7 +39,7 @@ int main()
 	vector<Sample2to1D> test_samples = get_mnist_samples(test_images_path, test_labels_path);
 	int test_num = test_samples.size();
 
-	// LeNet5-like network
+	// LeNet-like network
 	NetworkBuilder networkBuilder(28, 28);
 	networkBuilder.add("Conv2D", map<string, int>{{"count", 6}, {"width", 3}, {"height", 3}});
 	networkBuilder.add("Activation2D", relu);
@@ -50,7 +49,7 @@ int main()
 	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
 	networkBuilder.add("Flatten");
 	networkBuilder.add("Dense", map<string, int>{{"length", 10}});
-	networkBuilder.add("Activation1D", sigm);
+	networkBuilder.add("Softmax");
 	Network network(networkBuilder.get_2d(), networkBuilder.get_2to1d(), networkBuilder.get_1d());
 	cout << networkBuilder.get_shapes() << endl;
 
