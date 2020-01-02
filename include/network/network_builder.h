@@ -35,17 +35,21 @@ class NetworkBuilder
 	Layer2to1D* layer2to1d;
 	vector<Layer1D*> layer1d_s;
 	stringstream ostream;
+
+	int total_params;
 public:
 	NetworkBuilder(int count)
 	{
 		input_count = count;
 		input_width = 1;
 		input_height = 1;
+		total_params = 0;
 
 		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
-		ostream << "\t\t" << input_count << "\n";
+		ostream << "Layer Name:\tParameters:\tParam Count:\tOutput Shape:\n";
+		ostream << "\t\t\t\t\t\t" << input_count << "\n";
 	}
 
 	NetworkBuilder(int width, int height)
@@ -53,15 +57,18 @@ public:
 		input_count = 1;
 		input_width = width;
 		input_height = height;
+		total_params = 0;
 
 		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
-		ostream << "\t\t" << input_width << "x" << input_height << "\n";
+		ostream << "Layer Name:\tParameters:\tParam Count:\tOutput Shape:\n";
+		ostream << "\t\t\t\t\t\t" << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
 	string get_shapes()
 	{
+		ostream << "\nTotal params: " << total_params << "\n";
 		return ostream.str();
 	}
 
@@ -151,11 +158,20 @@ private:
 		Conv2D* conv2d = new Conv2D(kernel, params);
 		layer2d_s.push_back(conv2d);
 
+		int parameter_count = count * input_count * width * height;
+		total_params += parameter_count;
+
 		input_count = out_count;
 		input_width = out_width;
 		input_height = out_height;
 
 		ostream << left << setw(16) << "Conv2D";
+
+		stringstream pstream;
+		pstream << count << "x" << width << "x" << height;
+		ostream << left << setw(16) << pstream.str();
+
+		ostream << left << setw(16) << parameter_count;
 		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
@@ -188,11 +204,20 @@ private:
 		SeparableConv2D* separableconv2d = new SeparableConv2D(depthwise_kernel, pointwise_kernel, params);
 		layer2d_s.push_back(separableconv2d);
 
+		int parameter_count = input_count * kernel_width * kernel_height + kernel_count * input_count;
+		total_params += parameter_count;
+
 		input_count = out_count;
 		input_width = out_width;
 		input_height = out_height;
 
 		ostream << left << setw(16) << "SeparableConv2D";
+
+		stringstream pstream;
+		pstream << kernel_count << "x" << kernel_width << "x" << kernel_height;
+		ostream << left << setw(16) << pstream.str();
+
+		ostream << left << setw(16) << parameter_count;
 		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
@@ -218,6 +243,12 @@ private:
 		input_height = out_height;
 
 		ostream << left << setw(16) << "MaxPooling2D";
+
+		stringstream pstream;
+		pstream << width << "x" << height;
+		ostream << left << setw(16) << pstream.str();
+
+		ostream << left << setw(16) << "0";
 		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
@@ -230,6 +261,11 @@ private:
 
 		Activation2D* activation2d = new Activation2D(activation, params);
 		layer2d_s.push_back(activation2d);
+
+		ostream << left << setw(16) << activation.get_name();
+		ostream << left << setw(16) << "-";
+		ostream << left << setw(16) << "0";
+		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
 	void flatten()
@@ -247,15 +283,17 @@ private:
 		input_height = 1;
 
 		ostream << left << setw(16) << "Flatten";
+		ostream << left << setw(16) << "-";
+		ostream << left << setw(16) << "0";
 		ostream << input_count << "\n";
 	}
 
 	void dense(map<string, int> params)
 	{
-		int out_count = params["length"];
+		int count = params["length"];
 
-		tensor_2d weights(out_count, tensor_1d(input_count));
-		tensor_1d biases(out_count);
+		tensor_2d weights(count, tensor_1d(input_count));
+		tensor_1d biases(count);
 
 		make_random(weights, 1.0 / sqrt(input_count));
 		make_random(biases, 1.0);
@@ -265,9 +303,18 @@ private:
 		Dense* dense = new Dense(weights, biases, params);
 		layer1d_s.push_back(dense);
 
-		input_count = out_count;
+		int parameter_count = count * input_count + count;
+		total_params += parameter_count;
+
+		input_count = count;
 
 		ostream << left << setw(16) << "Dense";
+
+		stringstream pstream;
+		pstream << count;
+		ostream << left << setw(16) << pstream.str();
+
+		ostream << left << setw(16) << parameter_count;
 		ostream << input_count << "\n";
 	}
 
@@ -277,6 +324,11 @@ private:
 		params["out_count"] = input_count;
 		Activation1D* activation1d = new Activation1D(activation, params);
 		layer1d_s.push_back(activation1d);
+
+		ostream << left << setw(16) << activation.get_name();
+		ostream << left << setw(16) << "-";
+		ostream << left << setw(16) << "0";
+		ostream << input_count << "\n";
 	}
 
 	void softmax()
@@ -285,6 +337,11 @@ private:
 		params["out_count"] = input_count;
 		Softmax* softmax = new Softmax(params);
 		layer1d_s.push_back(softmax);
+
+		ostream << left << setw(16) << "Softmax";
+		ostream << left << setw(16) << "-";
+		ostream << left << setw(16) << "0";
+		ostream << input_count << "\n";
 	}
 };
 

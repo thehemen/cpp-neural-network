@@ -53,6 +53,24 @@ public:
 				return 1.0;
 		}
 	}
+
+	string get_name()
+	{
+		switch(activationType)
+		{
+			case ActivationType::SIGMOID:
+				return "Sigmoid";
+
+			case ActivationType::TANH:
+				return "Tanh";
+
+			case ActivationType::RELU:
+				return "ReLU";
+
+			default:
+				return "Linear";
+		}
+	}
 };
 
 #endif
