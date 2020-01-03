@@ -15,12 +15,12 @@ int main()
 {
 	srand(time(0));
 
-	const double learning_rate = 0.001;
+	const double learning_rate = 0.0003;
 	const double beta_1 = 0.9;
 	const double beta_2 = 0.999;
 	const double epsilon = 1e-9;
 
-	const int epochs = 16;
+	const int epochs = 10;
 
 	const int iteration_step = 100;
 	const int precision = 6;
@@ -41,13 +41,15 @@ int main()
 
 	// LeNet-like network
 	NetworkBuilder networkBuilder(28, 28);
-	networkBuilder.add("Conv2D", map<string, int>{{"count", 6}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Conv2D", map<string, int>{{"count", 4}, {"width", 3}, {"height", 3}});
 	networkBuilder.add("Activation2D", relu);
 	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
-	networkBuilder.add("Conv2D", map<string, int>{{"count", 16}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Conv2D", map<string, int>{{"count", 8}, {"width", 3}, {"height", 3}});
 	networkBuilder.add("Activation2D", relu);
 	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
 	networkBuilder.add("Flatten");
+	networkBuilder.add("Dense", map<string, int>{{"length", 64}});
+	networkBuilder.add("Activation1D", relu);
 	networkBuilder.add("Dense", map<string, int>{{"length", 10}});
 	networkBuilder.add("Softmax");
 	Network network(networkBuilder.get_2d(), networkBuilder.get_2to1d(), networkBuilder.get_1d());
