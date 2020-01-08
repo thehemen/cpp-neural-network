@@ -1,6 +1,7 @@
 # C++ Neural Network
 C++ Neural Network made from scratch. Written for training purposes only. Uses [OpenMP](https://www.openmp.org/) for faster computations.
-It gives 98,4% accuracy on MNIST dataset after ~40 min training on [Intel Core-i5 7400](https://ark.intel.com/content/www/ru/ru/ark/products/97147/intel-core-i5-7400-processor-6m-cache-up-to-3-50-ghz.html).
+
+It gives 98.4% accuracy on MNIST dataset in ~40 minutes training with Intel Core i5-7400.
 # Supported features
 Layers:
 * Conv2D,
@@ -8,7 +9,7 @@ Layers:
 * MaxPooling2D,
 * Flatten,
 * Dense,
-* Activation{n}D (for activations of both 1d- and 2d- data types).
+* Activation1D / Activation2D.
 
 Activation types:
 * Sigmoid,
@@ -35,7 +36,7 @@ $ cmake --build . --target xor
 $ ./xor
 ```
 # How to run MNIST example
-Create /mnist directory, [download](http://yann.lecun.com/exdb/mnist/) MNIST archives and unpack here,
+Create /mnist directory, download [MNIST](http://yann.lecun.com/exdb/mnist/) archives and unpack here,
 Create /bin directory, run here:
 ```sh
 $ cmake ..
