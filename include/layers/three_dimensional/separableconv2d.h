@@ -2,14 +2,14 @@
 #include <omp.h>  // OpenMP headers
 #include <ops.h>
 #include <types.h>
-#include <layers/two_dimensional/layer2d.h>
+#include <layers/three_dimensional/layer3d.h>
 
 #ifndef SEPARABLE_CONV2D_H
 #define SEPARABLE_CONV2D_H
 
 using namespace std;
 
-class SeparableConv2D : public Layer2D
+class SeparableConv2D : public Layer3D
 {
 	tensor_4d depthwise_kernel;
 	tensor_4d pointwise_kernel;

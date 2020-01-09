@@ -38,7 +38,7 @@ int main()
 	networkBuilder.add("Activation1D", tanh);
 	networkBuilder.add("Dense", map<string, int>{{"length", 1}});
 	networkBuilder.add("Activation1D", sigm);
-	Network network(networkBuilder.get_2d(), networkBuilder.get_2to1d(), networkBuilder.get_1d());
+	Network network(networkBuilder.get_3d(), networkBuilder.get_3to1d(), networkBuilder.get_1d());
 	cout << networkBuilder.get_shapes() << endl;
 
 	Status status(iteration_step, precision, space_count);

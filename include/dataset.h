@@ -19,12 +19,12 @@ struct Sample1D
     }
 };
 
-struct Sample2to1D
+struct Sample3to1D
 {
 	tensor_3d inputs;
 	tensor_1d outputs;
 
-	Sample2to1D(tensor_3d inputs, tensor_1d outputs)
+	Sample3to1D(tensor_3d inputs, tensor_1d outputs)
 	{
 		this->inputs = inputs;
 		this->outputs = outputs;
@@ -106,13 +106,13 @@ u_char* read_labels(string full_path, int& number_of_labels)
     }
 }
 
-vector<Sample2to1D> get_mnist_samples(string images_full_path, string labels_full_path)
+vector<Sample3to1D> get_mnist_samples(string images_full_path, string labels_full_path)
 {
 	const int width = 28;
 	const int height = 28;
 	const int nums = 10;
 
-	vector<Sample2to1D> samples;
+	vector<Sample3to1D> samples;
 
 	int number_of_images, number_of_labels, image_size;
     u_char** images = read_images(images_full_path, number_of_images, image_size);
@@ -138,7 +138,7 @@ vector<Sample2to1D> get_mnist_samples(string images_full_path, string labels_ful
 
         int class_id = (int)labels[i];
         outputs[class_id] = 1.0;
-        samples.push_back(Sample2to1D(inputs, outputs));
+        samples.push_back(Sample3to1D(inputs, outputs));
     }
 
 	return samples;

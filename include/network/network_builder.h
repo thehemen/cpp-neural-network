@@ -11,14 +11,14 @@
 #include <layers/one_dimensional/activation1d.h>
 #include <layers/one_dimensional/softmax.h>
 
-#include <layers/two_to_one_dim/layer2to1d.h>
-#include <layers/two_to_one_dim/flatten.h>
+#include <layers/three_to_one_dim/layer3to1d.h>
+#include <layers/three_to_one_dim/flatten.h>
 
-#include <layers/two_dimensional/layer2d.h>
-#include <layers/two_dimensional/conv2d.h>
-#include <layers/two_dimensional/separableconv2d.h>
-#include <layers/two_dimensional/maxpooling2d.h>
-#include <layers/two_dimensional/activation2d.h>
+#include <layers/three_dimensional/layer3d.h>
+#include <layers/three_dimensional/conv2d.h>
+#include <layers/three_dimensional/separableconv2d.h>
+#include <layers/three_dimensional/maxpooling2d.h>
+#include <layers/three_dimensional/activation3d.h>
 
 #ifndef NETWORK_BUILDER_H
 #define NETWORK_BUILDER_H
@@ -31,8 +31,8 @@ class NetworkBuilder
 	int input_width;
 	int input_height;
 
-	vector<Layer2D*> layer2d_s;
-	Layer2to1D* layer2to1d;
+	vector<Layer3D*> layer3d_s;
+	Layer3to1D* layer3to1d;
 	vector<Layer1D*> layer1d_s;
 	stringstream ostream;
 
@@ -45,7 +45,7 @@ public:
 		input_height = 1;
 		total_params = 0;
 
-		layer2d_s = vector<Layer2D*>();
+		layer3d_s = vector<Layer3D*>();
 		layer1d_s = vector<Layer1D*>();
 
 		ostream << "Layer Name:\tParameters:\tParam Count:\tOutput Shape:\n";
@@ -59,7 +59,7 @@ public:
 		input_height = height;
 		total_params = 0;
 
-		layer2d_s = vector<Layer2D*>();
+		layer3d_s = vector<Layer3D*>();
 		layer1d_s = vector<Layer1D*>();
 
 		ostream << "Layer Name:\tParameters:\tParam Count:\tOutput Shape:\n";
@@ -72,14 +72,14 @@ public:
 		return ostream.str();
 	}
 
-	vector<Layer2D*> get_2d()
+	vector<Layer3D*> get_3d()
 	{
-		return layer2d_s;
+		return layer3d_s;
 	}
 
-	Layer2to1D* get_2to1d()
+	Layer3to1D* get_3to1d()
 	{
-		return layer2to1d;
+		return layer3to1d;
 	}
 
 	vector<Layer1D*> get_1d()
@@ -121,9 +121,9 @@ public:
 
 	void add(string layerType, Activation activation)
 	{
-		if(layerType == "Activation2D")
+		if(layerType == "Activation3D")
 		{
-			activation2d(activation);
+			activation3d(activation);
 		}
 		else if(layerType == "Activation1D")
 		{
@@ -156,7 +156,7 @@ private:
 		params["padding_height"] = input_height - out_height;
 
 		Conv2D* conv2d = new Conv2D(kernel, params);
-		layer2d_s.push_back(conv2d);
+		layer3d_s.push_back(conv2d);
 
 		int parameter_count = count * input_count * width * height;
 		total_params += parameter_count;
@@ -202,7 +202,7 @@ private:
 		params["padding_height"] = input_height - out_height;
 
 		SeparableConv2D* separableconv2d = new SeparableConv2D(depthwise_kernel, pointwise_kernel, params);
-		layer2d_s.push_back(separableconv2d);
+		layer3d_s.push_back(separableconv2d);
 
 		int parameter_count = input_count * kernel_width * kernel_height + kernel_count * input_count;
 		total_params += parameter_count;
@@ -237,7 +237,7 @@ private:
 		params["out_height"] = out_height;
 
 		MaxPooling2D* maxpool2d = new MaxPooling2D(params);
-		layer2d_s.push_back(maxpool2d);
+		layer3d_s.push_back(maxpool2d);
 
 		input_width = out_width;
 		input_height = out_height;
@@ -252,15 +252,15 @@ private:
 		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
-	void activation2d(Activation activation)
+	void activation3d(Activation activation)
 	{
 		map<string, int> params;
 		params["out_count"] = input_count;
 		params["out_width"] = input_width;
 		params["out_height"] = input_height;
 
-		Activation2D* activation2d = new Activation2D(activation, params);
-		layer2d_s.push_back(activation2d);
+		Activation3D* activation3d = new Activation3D(activation, params);
+		layer3d_s.push_back(activation3d);
 
 		ostream << left << setw(16) << activation.get_name();
 		ostream << left << setw(16) << "-";
@@ -276,7 +276,7 @@ private:
 		params["height"] = input_height;
 
 		Flatten* flatten = new Flatten(params);
-		layer2to1d = flatten;
+		layer3to1d = flatten;
 
 		input_count *= input_width * input_height;
 		input_width = 1;

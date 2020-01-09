@@ -6,8 +6,8 @@
 #include <types.h>
 
 #include <layers/one_dimensional/layer1d.h>
-#include <layers/two_to_one_dim/layer2to1d.h>
-#include <layers/two_dimensional/layer2d.h>
+#include <layers/three_to_one_dim/layer3to1d.h>
+#include <layers/three_dimensional/layer3d.h>
 
 #ifndef NETWORK_H
 #define NETWORK_H
@@ -16,35 +16,35 @@ using namespace std;
 
 class Network
 {
-	vector<Layer2D*> layer2d_s;
-	Layer2to1D* layer2to1d;
+	vector<Layer3D*> layer3d_s;
+	Layer3to1D* layer3to1d;
 	vector<Layer1D*> layer1d_s;
 
-	int layer2d_len;
+	int layer3d_len;
 	int layer1d_len;
 
 	tensor_1d outputs;
 public:
-	Network(vector<Layer2D*> layer2d_s, Layer2to1D* layer2to1d, vector<Layer1D*> layer1d_s)
+	Network(vector<Layer3D*> layer3d_s, Layer3to1D* layer3to1d, vector<Layer1D*> layer1d_s)
 	{
-		this->layer2d_s = vector<Layer2D*>(layer2d_s);
-		this->layer2to1d = layer2to1d;
+		this->layer3d_s = vector<Layer3D*>(layer3d_s);
+		this->layer3to1d = layer3to1d;
 		this->layer1d_s = vector<Layer1D*>(layer1d_s);
 
-		layer2d_len = layer2d_s.size();
+		layer3d_len = layer3d_s.size();
 		layer1d_len = layer1d_s.size();
 	}
 
-	tensor_1d forward_2to1d(tensor_3d inputs)
+	tensor_1d forward_3to1d(tensor_3d inputs)
 	{
 		tensor_3d tensor3d = inputs;
 
-		for(int i = 0; i < layer2d_len; ++i)
+		for(int i = 0; i < layer3d_len; ++i)
 		{
-			tensor3d = layer2d_s[i]->forward(tensor3d);
+			tensor3d = layer3d_s[i]->forward(tensor3d);
 		}
 
-		tensor_1d tensor1d = layer2to1d->forward(tensor3d);
+		tensor_1d tensor1d = layer3to1d->forward(tensor3d);
 
 		for(int i = 0; i < layer1d_len; ++i)
 		{
@@ -68,7 +68,7 @@ public:
 		return outputs;
 	}
 
-	tensor_3d backward_1to2d(tensor_1d outputs_true)
+	tensor_3d backward_1to3d(tensor_1d outputs_true)
 	{
 		int out_count = outputs.size();
 		tensor_1d tensor1d(out_count);
@@ -83,11 +83,11 @@ public:
 			tensor1d = layer1d_s[i]->backward(tensor1d);
 		}
 
-		tensor_3d tensor3d = layer2to1d->backward(tensor1d);
+		tensor_3d tensor3d = layer3to1d->backward(tensor1d);
 
-		for(int i = layer2d_len - 1; i >= 0; --i)
+		for(int i = layer3d_len - 1; i >= 0; --i)
 		{
-			tensor3d = layer2d_s[i]->backward(tensor3d);
+			tensor3d = layer3d_s[i]->backward(tensor3d);
 		}
 
 		return tensor3d;
@@ -113,9 +113,9 @@ public:
 
 	void fit(int t, AdamOptimizer& adam)
 	{
-		for(int i = 0; i < layer2d_len; ++i)
+		for(int i = 0; i < layer3d_len; ++i)
 		{
-			layer2d_s[i]->fit(t, adam);
+			layer3d_s[i]->fit(t, adam);
 		}
 
 		for(int i = 0; i < layer1d_len; ++i)

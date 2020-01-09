@@ -1,20 +1,20 @@
 #include <map>
 #include <omp.h>  // OpenMP headers
 #include <types.h>
-#include <layers/two_to_one_dim/layer2to1d.h>
+#include <layers/three_to_one_dim/layer3to1d.h>
 
 #ifndef FLATTEN_H
 #define FLATTEN_H
 
 using namespace std;
 
-class Flatten : public Layer2to1D
+class Flatten : public Layer3to1D
 {
 	int count;
 	int width;
 	int height;
 public:
-	Flatten() : Layer2to1D() {}
+	Flatten() : Layer3to1D() {}
 
 	Flatten(map<string, int> params)
 	{

@@ -2,14 +2,14 @@
 #include <omp.h>  // OpenMP headers
 #include <ops.h>
 #include <types.h>
-#include <layers/two_dimensional/layer2d.h>
+#include <layers/three_dimensional/layer3d.h>
 
 #ifndef ACTIVATION_2D_H
 #define ACTIVATION_2D_H
 
 using namespace std;
 
-class Activation2D : public Layer2D
+class Activation3D : public Layer3D
 {
 	Activation activation;
 
@@ -20,7 +20,7 @@ class Activation2D : public Layer2D
 	tensor_3d inputs;
 	tensor_3d outputs;
 public:
-	Activation2D(Activation activation, map<string, int> params)
+	Activation3D(Activation activation, map<string, int> params)
 	{
 		this->activation = activation;
 

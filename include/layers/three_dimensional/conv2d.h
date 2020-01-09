@@ -2,14 +2,14 @@
 #include <omp.h>  // OpenMP headers
 #include <ops.h>
 #include <types.h>
-#include <layers/two_dimensional/layer2d.h>
+#include <layers/three_dimensional/layer3d.h>
 
 #ifndef CONV2D_H
 #define CONV2D_H
 
 using namespace std;
 
-class Conv2D : public Layer2D
+class Conv2D : public Layer3D
 {
 	tensor_4d kernel;
 

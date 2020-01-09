@@ -2,14 +2,14 @@
 #include <omp.h>  // OpenMP headers
 #include <ops.h>
 #include <types.h>
-#include <layers/two_dimensional/layer2d.h>
+#include <layers/three_dimensional/layer3d.h>
 
 #ifndef MAXPOOLING_2D_H
 #define MAXPOOLING_2D_H
 
 using namespace std;
 
-class MaxPooling2D : public Layer2D
+class MaxPooling2D : public Layer3D
 {
 	int width;
 	int height;
