@@ -1,13 +1,13 @@
 #include <iostream>
 #include <ctime>
 #include <map>
-#include <dataset.h>
 #include <activation.h>
 #include <adam_optimizer.h>
 #include <metrics.h>
 #include <status.h>
 #include <network/network.h>
 #include <network/network_builder.h>
+#include <dataset/xor.h>
 
 using namespace std;
 

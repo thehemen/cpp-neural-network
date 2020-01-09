@@ -2,34 +2,10 @@
 #include <fstream>
 #include <types.h>
 
-#ifndef DATASET_H
-#define DATASET_H
+#ifndef MNIST_H
+#define MNIST_H
 
 using namespace std;
-
-struct Sample1D
-{
-    tensor_1d inputs;
-    tensor_1d outputs;
-
-    Sample1D(tensor_1d inputs, tensor_1d outputs)
-    {
-        this->inputs = inputs;
-        this->outputs = outputs;
-    }
-};
-
-struct Sample3to1D
-{
-	tensor_3d inputs;
-	tensor_1d outputs;
-
-	Sample3to1D(tensor_3d inputs, tensor_1d outputs)
-	{
-		this->inputs = inputs;
-		this->outputs = outputs;
-	}
-};
 
 u_char** read_images(string full_path, int& number_of_images, int& image_size) 
 {
@@ -141,16 +117,6 @@ vector<Sample3to1D> get_mnist_samples(string images_full_path, string labels_ful
         samples.push_back(Sample3to1D(inputs, outputs));
     }
 
-	return samples;
-}
-
-vector<Sample1D> get_xor_samples()
-{
-	vector<Sample1D> samples;
-	samples.push_back(Sample1D(tensor_1d({0.0, 0.0}), tensor_1d(vector<double>({0.0}))));
-	samples.push_back(Sample1D(tensor_1d({0.0, 1.0}), tensor_1d(vector<double>({1.0}))));
-	samples.push_back(Sample1D(tensor_1d({1.0, 0.0}), tensor_1d(vector<double>({1.0}))));
-	samples.push_back(Sample1D(tensor_1d({1.0, 1.0}), tensor_1d(vector<double>({0.0}))));
 	return samples;
 }
 

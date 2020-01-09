@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cfloat>
+#include <types.h>
 
 #ifndef METRIC_H
 #define METRIC_H

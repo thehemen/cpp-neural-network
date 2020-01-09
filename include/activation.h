@@ -3,6 +3,8 @@
 #ifndef ACTIVATION_H
 #define ACTIVATION_H
 
+using namespace std;
+
 enum ActivationType {NONE, SIGMOID, TANH, RELU};
 
 class Activation
