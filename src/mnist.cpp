@@ -29,13 +29,13 @@ int main()
 	Activation relu(ActivationType::RELU);
 	AdamOptimizer adam(learning_rate, beta_1, beta_2, epsilon);
 
-	string train_images_path = "../mnist/train-images-idx3-ubyte";
-	string train_labels_path = "../mnist/train-labels-idx1-ubyte";
+	string train_images_path = "../datasets/mnist/train-images-idx3-ubyte";
+	string train_labels_path = "../datasets/mnist/train-labels-idx1-ubyte";
 	vector<Sample3to1D> train_samples = get_mnist_samples(train_images_path, train_labels_path);
 	int train_num = train_samples.size();
 
-	string test_images_path = "../mnist/t10k-images-idx3-ubyte";
-	string test_labels_path = "../mnist/t10k-labels-idx1-ubyte";
+	string test_images_path = "../datasets/mnist/t10k-images-idx3-ubyte";
+	string test_labels_path = "../datasets/mnist/t10k-labels-idx1-ubyte";
 	vector<Sample3to1D> test_samples = get_mnist_samples(test_images_path, test_labels_path);
 	int test_num = test_samples.size();
 

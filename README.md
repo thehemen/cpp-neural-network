@@ -36,7 +36,7 @@ $ cmake --build . --target xor
 $ ./xor
 ```
 # How to run MNIST example
-Create /mnist directory, download [MNIST](http://yann.lecun.com/exdb/mnist/) archives and unpack here,
+Create /dataset/mnist subdirectory, download [MNIST](http://yann.lecun.com/exdb/mnist/) archives and unpack here,
 Create /bin directory, run here:
 ```sh
 $ cmake ..
