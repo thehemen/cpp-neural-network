@@ -11,8 +11,14 @@
 
 using namespace std;
 
-int main()
+int main(int argc, char *argv[])
 {
+	if(argc != 5)
+	{
+		cout << "./mnist [train-images] [train-labels] [t10k-images] [t10k-labels]" << endl;
+		return 1;
+	}
+
 	srand(time(0));
 
 	const double learning_rate = 0.0003;
@@ -29,14 +35,10 @@ int main()
 	Activation relu(ActivationType::RELU);
 	AdamOptimizer adam(learning_rate, beta_1, beta_2, epsilon);
 
-	string train_images_path = "../datasets/mnist/train-images-idx3-ubyte";
-	string train_labels_path = "../datasets/mnist/train-labels-idx1-ubyte";
-	vector<Sample3to1D> train_samples = get_mnist_samples(train_images_path, train_labels_path);
+	vector<Sample3to1D> train_samples = get_mnist_samples(argv[1], argv[2]);
 	int train_num = train_samples.size();
 
-	string test_images_path = "../datasets/mnist/t10k-images-idx3-ubyte";
-	string test_labels_path = "../datasets/mnist/t10k-labels-idx1-ubyte";
-	vector<Sample3to1D> test_samples = get_mnist_samples(test_images_path, test_labels_path);
+	vector<Sample3to1D> test_samples = get_mnist_samples(argv[3], argv[4]);
 	int test_num = test_samples.size();
 
 	// LeNet-like network
