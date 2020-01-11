@@ -5,7 +5,7 @@
 #include <adam_optimizer.h>
 #include <metrics.h>
 #include <status.h>
-#include <network/network.h>
+#include <network/network_3to1d.h>
 #include <network/network_builder.h>
 #include <dataset/mnist.h>
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	networkBuilder.add("Activation1D", relu);
 	networkBuilder.add("Dense", map<string, int>{{"length", 10}});
 	networkBuilder.add("Softmax");
-	Network network(networkBuilder.get_3d(), networkBuilder.get_3to1d(), networkBuilder.get_1d());
+	Network3to1D network(networkBuilder.get_3d(), networkBuilder.get_3to1d(), networkBuilder.get_1d());
 	cout << networkBuilder.get_shapes() << endl;
 
 	Status status(iteration_step, precision, space_count);
@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
 		for(int j = 0; j < train_num; ++j)
 		{
 			int t = i * train_num + j;
-			network.forward_3to1d(train_samples[j].inputs);
-			network.backward_1to3d(train_samples[j].outputs);
+			network.forward(train_samples[j].inputs);
+			network.backward(train_samples[j].outputs);
 			network.fit(t, adam);
 			status.update(i, j);
 		}
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 		status.reset(test_num);
 		for(int j = 0; j < test_num; ++j)
 		{
-			auto results = network.forward_3to1d(test_samples[j].inputs);
+			auto results = network.forward(test_samples[j].inputs);
 			loss += categorical_crossentropy(test_samples[j].outputs, results);
 			acc += categorical_accuracy(test_samples[j].outputs, results);
 			status.update(i, j);

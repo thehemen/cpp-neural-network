@@ -5,7 +5,7 @@
 #include <adam_optimizer.h>
 #include <metrics.h>
 #include <status.h>
-#include <network/network.h>
+#include <network/network_1d.h>
 #include <network/network_builder.h>
 #include <dataset/xor.h>
 
@@ -38,7 +38,7 @@ int main()
 	networkBuilder.add("Activation1D", tanh);
 	networkBuilder.add("Dense", map<string, int>{{"length", 1}});
 	networkBuilder.add("Activation1D", sigm);
-	Network network(networkBuilder.get_3d(), networkBuilder.get_3to1d(), networkBuilder.get_1d());
+	Network1D network(networkBuilder.get_1d());
 	cout << networkBuilder.get_shapes() << endl;
 
 	Status status(iteration_step, precision, space_count);
@@ -49,8 +49,8 @@ int main()
 		for(int j = 0; j < sample_num; ++j)
 		{
 			int t = i * sample_num + j;
-			network.forward_1to1d(samples[j].inputs);
-			network.backward_1to1d(samples[j].outputs);
+			network.forward(samples[j].inputs);
+			network.backward(samples[j].outputs);
 			network.fit(t, adam);
 		}
 
@@ -61,7 +61,7 @@ int main()
 		{
 			for(int j = 0; j < sample_num; ++j)
 			{
-				auto results = network.forward_1to1d(samples[j].inputs);
+				auto results = network.forward(samples[j].inputs);
 				loss += binary_crossentropy(samples[j].outputs, results);
 				acc += binary_accuracy(samples[j].outputs, results);
 			}

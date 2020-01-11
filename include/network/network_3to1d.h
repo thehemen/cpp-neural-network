@@ -9,12 +9,12 @@
 #include <layers/three_to_one_dim/layer3to1d.h>
 #include <layers/three_dimensional/layer3d.h>
 
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef NETWORK_3to1D_H
+#define NETWORK_3to1D_H
 
 using namespace std;
 
-class Network
+class Network3to1D
 {
 	vector<Layer3D*> layer3d_s;
 	Layer3to1D* layer3to1d;
@@ -25,7 +25,7 @@ class Network
 
 	tensor_1d outputs;
 public:
-	Network(vector<Layer3D*> layer3d_s, Layer3to1D* layer3to1d, vector<Layer1D*> layer1d_s)
+	Network3to1D(vector<Layer3D*> layer3d_s, Layer3to1D* layer3to1d, vector<Layer1D*> layer1d_s)
 	{
 		this->layer3d_s = vector<Layer3D*>(layer3d_s);
 		this->layer3to1d = layer3to1d;
@@ -35,7 +35,7 @@ public:
 		layer1d_len = layer1d_s.size();
 	}
 
-	tensor_1d forward_3to1d(tensor_3d inputs)
+	tensor_1d forward(tensor_3d inputs)
 	{
 		tensor_3d tensor3d = inputs;
 
@@ -55,20 +55,7 @@ public:
 		return outputs;
 	}
 
-	tensor_1d forward_1to1d(tensor_1d inputs)
-	{
-		tensor_1d tensor1d = inputs;
-
-		for(int i = 0; i < layer1d_len; ++i)
-		{
-			tensor1d = layer1d_s[i]->forward(tensor1d);
-		}
-
-		outputs = tensor1d;
-		return outputs;
-	}
-
-	tensor_3d backward_1to3d(tensor_1d outputs_true)
+	tensor_3d backward(tensor_1d outputs_true)
 	{
 		int out_count = outputs.size();
 		tensor_1d tensor1d(out_count);
@@ -91,24 +78,6 @@ public:
 		}
 
 		return tensor3d;
-	}
-
-	tensor_1d backward_1to1d(tensor_1d outputs_true)
-	{
-		int out_count = outputs.size();
-		tensor_1d tensor1d(out_count);
-
-		for(int i = 0; i < out_count; ++i)
-		{
-			tensor1d[i] = outputs[i] - outputs_true[i];
-		}
-
-		for(int i = layer1d_len - 1; i >= 0; --i)
-		{
-			tensor1d = layer1d_s[i]->backward(tensor1d);
-		}
-
-		return tensor1d;
 	}
 
 	void fit(int t, AdamOptimizer& adam)
