@@ -70,6 +70,55 @@ void make_zero(tensor_4d &arr)
 	}
 }
 
+tensor_1d zeropadding1d(tensor_1d inputs, int width_pad)
+{
+	int width = inputs.size();
+	int out_width = width + width_pad * 2;
+	tensor_1d outputs(out_width);
+
+	#pragma omp parallel for
+	for(int x = width_pad; x < out_width - width_pad; ++x)
+	{
+		outputs[x] = inputs[x - width_pad];
+	}
+
+	return outputs;
+}
+
+tensor_1d rot180_1d(tensor_1d inputs)
+{
+	int width = inputs.size();
+	tensor_1d outputs(width);
+
+	#pragma omp parallel for
+	for(int x = 0; x < width; ++x)
+	{
+		outputs[x] = inputs[width - x - 1];
+	}
+
+	return outputs;
+}
+
+void conv1d(tensor_1d image, tensor_1d kernel, tensor_1d &out)
+{
+	int image_width = image.size();
+	int kernel_width = kernel.size();
+	int out_width = image_width - kernel_width + 1;
+
+    #pragma omp parallel for
+    for(int x = 0; x < out_width; ++x)
+    {
+        double acc = 0.0;
+
+        for(int k_x = 0; k_x < kernel_width; ++k_x)
+        {
+            acc += image[x + k_x] * kernel[k_x];
+        }
+
+        out[x] += acc;
+    }
+}
+
 tensor_2d zeropadding2d(tensor_2d inputs, int width_pad, int height_pad)
 {
 	int width = inputs.size();
@@ -142,4 +191,5 @@ tensor_2d conv2d(tensor_2d image, tensor_2d kernel, tensor_2d &out)
 
     return out;
 }
+
 #endif

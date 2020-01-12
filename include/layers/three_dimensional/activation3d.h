@@ -4,8 +4,8 @@
 #include <types.h>
 #include <layers/three_dimensional/layer3d.h>
 
-#ifndef ACTIVATION_2D_H
-#define ACTIVATION_2D_H
+#ifndef ACTIVATION_3D_H
+#define ACTIVATION_3D_H
 
 using namespace std;
 

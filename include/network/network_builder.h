@@ -11,6 +11,17 @@
 #include <layers/one_dimensional/activation1d.h>
 #include <layers/one_dimensional/softmax.h>
 
+#include <layers/one_to_two_dim/layer1to2d.h>
+#include <layers/one_to_two_dim/embedding.h>
+
+#include <layers/two_dimensional/layer2d.h>
+#include <layers/two_dimensional/conv1d.h>
+#include <layers/two_dimensional/maxpooling1d.h>
+#include <layers/two_dimensional/activation2d.h>
+
+#include <layers/two_to_one_dim/layer2to1d.h>
+#include <layers/two_to_one_dim/globalmaxpooling1d.h>
+
 #include <layers/three_to_one_dim/layer3to1d.h>
 #include <layers/three_to_one_dim/flatten.h>
 
@@ -32,8 +43,13 @@ class NetworkBuilder
 	int input_height;
 
 	vector<Layer3D*> layer3d_s;
-	Layer3to1D* layer3to1d;
+	vector<Layer2D*> layer2d_s;
 	vector<Layer1D*> layer1d_s;
+
+	Layer3to1D* layer3to1d;
+	Layer1to2D* layer1to2d;
+	Layer2to1D* layer2to1d;
+	
 	stringstream ostream;
 
 	int total_params;
@@ -46,6 +62,7 @@ public:
 		total_params = 0;
 
 		layer3d_s = vector<Layer3D*>();
+		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
 		ostream << "Layer Name:\tParameters:\tParam Count:\tOutput Shape:\n";
@@ -60,6 +77,7 @@ public:
 		total_params = 0;
 
 		layer3d_s = vector<Layer3D*>();
+		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
 		ostream << "Layer Name:\tParameters:\tParam Count:\tOutput Shape:\n";
@@ -77,9 +95,9 @@ public:
 		return layer3d_s;
 	}
 
-	Layer3to1D* get_3to1d()
+	vector<Layer2D*> get_2d()
 	{
-		return layer3to1d;
+		return layer2d_s;
 	}
 
 	vector<Layer1D*> get_1d()
@@ -87,11 +105,30 @@ public:
 		return layer1d_s;
 	}
 
+	Layer3to1D* get_3to1d()
+	{
+		return layer3to1d;
+	}
+
+	Layer1to2D* get_1to2d()
+	{
+		return layer1to2d;
+	}
+
+	Layer2to1D* get_2to1d()
+	{
+		return layer2to1d;
+	}
+
 	void add(string layerType)
 	{
 		if(layerType == "Flatten")
 		{
 			flatten();
+		}
+		else if(layerType == "GlobalMaxPooling1D")
+		{
+			globalmaxpooling1d();
 		}
 		else if(layerType == "Softmax")
 		{
@@ -113,6 +150,18 @@ public:
 		{
 			maxpooling2d(params);
 		}
+		else if(layerType == "Embedding")
+		{
+			embedding(params);
+		}
+		else if(layerType == "Conv1D")
+		{
+			conv1d(params);
+		}
+		else if(layerType == "MaxPooling1D")
+		{
+			maxpooling1d(params);
+		}
 		else if(layerType == "Dense")
 		{
 			dense(params);
@@ -124,6 +173,10 @@ public:
 		if(layerType == "Activation3D")
 		{
 			activation3d(activation);
+		}
+		else if(layerType == "Activation2D")
+		{
+			activation2d(activation);
 		}
 		else if(layerType == "Activation1D")
 		{
@@ -283,6 +336,121 @@ private:
 		input_height = 1;
 
 		ostream << left << setw(16) << "Flatten";
+		ostream << left << setw(16) << "-";
+		ostream << left << setw(16) << "0";
+		ostream << input_count << "\n";
+	}
+
+	void embedding(map<string, int> params)
+	{
+		params["count"] = input_count;
+		int width = params["width"];
+		int max_words = params["max_words"];
+
+		tensor_2d weights(max_words, tensor_1d(width));
+		make_random(weights, 1.0 / sqrt(max_words * width));
+
+		Embedding* embedding = new Embedding(weights, params);
+		layer1to2d = embedding;
+
+		int parameter_count = width * max_words;
+		total_params += parameter_count;
+
+		input_width = params["width"];
+
+		ostream << left << setw(16) << "Embedding";
+		ostream << left << setw(16) << "-";
+		ostream << left << setw(16) << parameter_count;
+		ostream << input_count << "x" << input_width << "\n";
+	}
+
+	void conv1d(map<string, int> params)
+	{
+		int count = params["count"];
+		int width = params["width"];
+
+		tensor_3d kernel(count, tensor_2d(input_count, tensor_1d(width)));
+		make_random(kernel, 1.0 / sqrt(input_count * width));
+
+		params["input_count"] = input_count;
+		params["input_width"] = input_width;
+
+		int out_count = count;
+		int out_width = input_width - width + 1;
+
+		params["out_width"] = out_width;
+		params["padding_width"] = input_width - out_width;
+
+		Conv1D* conv1d = new Conv1D(kernel, params);
+		layer2d_s.push_back(conv1d);
+
+		int parameter_count = count * input_count * width;
+		total_params += parameter_count;
+
+		input_count = out_count;
+		input_width = out_width;
+
+		ostream << left << setw(16) << "Conv1D";
+
+		stringstream pstream;
+		pstream << count << "x" << width;
+		ostream << left << setw(16) << pstream.str();
+
+		ostream << left << setw(16) << parameter_count;
+		ostream << input_count << "x" << input_width << "\n";
+	}
+
+	void maxpooling1d(map<string, int> params)
+	{
+		int width = params["width"];
+		int out_width = input_width / width;
+
+		params["input_count"] = input_count;
+		params["input_width"] = input_width;
+		params["out_width"] = out_width;
+
+		MaxPooling1D* maxpool1d = new MaxPooling1D(params);
+		layer2d_s.push_back(maxpool1d);
+
+		input_width = out_width;
+
+		ostream << left << setw(16) << "MaxPooling1D";
+
+		stringstream pstream;
+		pstream << width;
+		ostream << left << setw(16) << pstream.str();
+
+		ostream << left << setw(16) << "0";
+		ostream << input_count << "x" << input_width << "\n";
+	}
+
+	void activation2d(Activation activation)
+	{
+		map<string, int> params;
+		params["count"] = input_count;
+		params["width"] = input_width;
+
+		Activation2D* activation2d = new Activation2D(activation, params);
+		layer2d_s.push_back(activation2d);
+
+		ostream << left << setw(16) << activation.get_name();
+		ostream << left << setw(16) << "-";
+		ostream << left << setw(16) << "0";
+		ostream << input_count << "x" << input_width << "\n";
+	}
+
+	void globalmaxpooling1d()
+	{
+		map<string, int> params;
+		params["count"] = input_count;
+		params["width"] = input_width;
+
+		GlobalMaxPooling1D* globalmaxpool1d = new GlobalMaxPooling1D(params);
+		layer2to1d = globalmaxpool1d;
+
+		input_width = 1;
+
+		ostream << left << setw(16) << "GlobalMaxPool1D";
 		ostream << left << setw(16) << "-";
 		ostream << left << setw(16) << "0";
 		ostream << input_count << "\n";
