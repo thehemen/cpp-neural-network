@@ -1,7 +1,10 @@
 # C++ Neural Network
 C++ Neural Network made from scratch. Written for training purposes only. Uses [OpenMP](https://www.openmp.org/) for faster computations.
-
-It gives 98.4% accuracy on MNIST dataset in ~40 minutes training with Intel Core i5-7400.
+|Dataset|Duration |Accuracy|
+|-------|---------|--------|
+|MNIST  |26 min.  |98.4 %  |
+|SST-2  |33 min.  |74.9 %  |
+|SST-5  |1h. 7min.|34.3 %  |
 # Supported features
 Layers:
 * Embedding,
@@ -49,6 +52,7 @@ $ ./mnist [train-images-path] [train-labels-path] [test-images-path] [test-label
 ```
 # How to run SST-2/SST-5 example
 [Download](https://github.com/HaebinShin/stanford-sentiment-dataset) refined Stanford Sentiment Treebank dataset.
+For binary classification use *binary*-tagged files, for five-class — *fine*-tagged ones.
 Create /bin directory, run here:
 ```sh
 $ cmake ..

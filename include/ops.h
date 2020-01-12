@@ -6,6 +6,11 @@
 #ifndef OPS_H
 #define OPS_H
 
+double get_random_value(double max_range = 1.0)
+{
+	return max_range * (double)rand() / RAND_MAX - max_range * 0.5;
+}
+
 // Xavier weight initialization.
 // Weights are taken randomly within [-1/sqrt(n); 1/sqrt(n)],
 // where n is the number of input units.
@@ -13,7 +18,7 @@ void make_random(tensor_1d &arr, double max_range)
 {
 	for(int i = 0, length = arr.size(); i < length; ++i)
 	{
-		arr[i] = max_range * (double)rand() / RAND_MAX - max_range * 0.5;
+		arr[i] = get_random_value(max_range);
 	}
 }
 

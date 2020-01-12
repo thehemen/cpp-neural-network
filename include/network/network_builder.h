@@ -15,6 +15,7 @@
 #include <layers/one_to_two_dim/embedding.h>
 
 #include <layers/two_dimensional/layer2d.h>
+#include <layers/two_dimensional/spatialdropout1d.h>
 #include <layers/two_dimensional/conv1d.h>
 #include <layers/two_dimensional/maxpooling1d.h>
 #include <layers/two_dimensional/activation2d.h>
@@ -38,6 +39,10 @@ using namespace std;
 
 class NetworkBuilder
 {
+	const int layer_name_width = 24;
+	const int parameter_name_width = 16;
+	const int param_count_name_width = 16;
+
 	int input_count;
 	int input_width;
 	int input_height;
@@ -65,8 +70,8 @@ public:
 		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
-		ostream << "Layer Name:\tParameters:\tParam Count:\tOutput Shape:\n";
-		ostream << "\t\t\t\t\t\t" << input_count << "\n";
+		ostream << "Layer Name:\t\tParameters:\tParam Count:\tOutput Shape:\n";
+		ostream << "\t\t\t\t\t\t\t" << input_count << "\n";
 	}
 
 	NetworkBuilder(int width, int height)
@@ -80,8 +85,8 @@ public:
 		layer2d_s = vector<Layer2D*>();
 		layer1d_s = vector<Layer1D*>();
 
-		ostream << "Layer Name:\tParameters:\tParam Count:\tOutput Shape:\n";
-		ostream << "\t\t\t\t\t\t" << input_count << "x" << input_width << "x" << input_height << "\n";
+		ostream << "Layer Name:\t\tParameters:\tParam Count:\tOutput Shape:\n";
+		ostream << "\t\t\t\t\t\t\t" << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
 	string get_shapes()
@@ -168,6 +173,14 @@ public:
 		}
 	}
 
+	void add(string layerType, map<string, float> params)
+	{
+		if(layerType == "SpatialDropout1D")
+		{
+			spatialdropout1d(params);
+		}
+	}
+
 	void add(string layerType, Activation activation)
 	{
 		if(layerType == "Activation3D")
@@ -218,13 +231,13 @@ private:
 		input_width = out_width;
 		input_height = out_height;
 
-		ostream << left << setw(16) << "Conv2D";
+		ostream << left << setw(layer_name_width) << "Conv2D";
 
 		stringstream pstream;
 		pstream << count << "x" << width << "x" << height;
-		ostream << left << setw(16) << pstream.str();
+		ostream << left << setw(parameter_name_width) << pstream.str();
 
-		ostream << left << setw(16) << parameter_count;
+		ostream << left << setw(param_count_name_width) << parameter_count;
 		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
@@ -264,13 +277,13 @@ private:
 		input_width = out_width;
 		input_height = out_height;
 
-		ostream << left << setw(16) << "SeparableConv2D";
+		ostream << left << setw(layer_name_width) << "SeparableConv2D";
 
 		stringstream pstream;
 		pstream << kernel_count << "x" << kernel_width << "x" << kernel_height;
-		ostream << left << setw(16) << pstream.str();
+		ostream << left << setw(parameter_name_width) << pstream.str();
 
-		ostream << left << setw(16) << parameter_count;
+		ostream << left << setw(param_count_name_width) << parameter_count;
 		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
@@ -295,13 +308,13 @@ private:
 		input_width = out_width;
 		input_height = out_height;
 
-		ostream << left << setw(16) << "MaxPooling2D";
+		ostream << left << setw(layer_name_width) << "MaxPooling2D";
 
 		stringstream pstream;
 		pstream << width << "x" << height;
-		ostream << left << setw(16) << pstream.str();
+		ostream << left << setw(parameter_name_width) << pstream.str();
 
-		ostream << left << setw(16) << "0";
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
@@ -315,9 +328,9 @@ private:
 		Activation3D* activation3d = new Activation3D(activation, params);
 		layer3d_s.push_back(activation3d);
 
-		ostream << left << setw(16) << activation.get_name();
-		ostream << left << setw(16) << "-";
-		ostream << left << setw(16) << "0";
+		ostream << left << setw(layer_name_width) << activation.get_name();
+		ostream << left << setw(parameter_name_width) << "-";
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "x" << input_width << "x" << input_height << "\n";
 	}
 
@@ -335,9 +348,9 @@ private:
 		input_width = 1;
 		input_height = 1;
 
-		ostream << left << setw(16) << "Flatten";
-		ostream << left << setw(16) << "-";
-		ostream << left << setw(16) << "0";
+		ostream << left << setw(layer_name_width) << "Flatten";
+		ostream << left << setw(parameter_name_width) << "-";
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "\n";
 	}
 
@@ -358,9 +371,27 @@ private:
 
 		input_width = params["width"];
 
-		ostream << left << setw(16) << "Embedding";
-		ostream << left << setw(16) << "-";
-		ostream << left << setw(16) << parameter_count;
+		ostream << left << setw(layer_name_width) << "Embedding";
+
+		stringstream pstream;
+		pstream << max_words << "x" << width;
+		ostream << left << setw(parameter_name_width) << pstream.str();
+
+		ostream << left << setw(param_count_name_width) << parameter_count;
+		ostream << input_count << "x" << input_width << "\n";
+	}
+
+	void spatialdropout1d(map<string, float> params)
+	{
+		params["count"] = input_count;
+		params["width"] = input_width;
+
+		SpatialDropout1D* spatial_dropout_1d = new SpatialDropout1D(params);
+		layer2d_s.push_back(spatial_dropout_1d);
+
+		ostream << left << setw(layer_name_width) << "SpatialDropout1D";
+		ostream << left << setw(parameter_name_width) << params["share"];
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "x" << input_width << "\n";
 	}
 
@@ -390,13 +421,13 @@ private:
 		input_count = out_count;
 		input_width = out_width;
 
-		ostream << left << setw(16) << "Conv1D";
+		ostream << left << setw(layer_name_width) << "Conv1D";
 
 		stringstream pstream;
 		pstream << count << "x" << width;
-		ostream << left << setw(16) << pstream.str();
+		ostream << left << setw(parameter_name_width) << pstream.str();
 
-		ostream << left << setw(16) << parameter_count;
+		ostream << left << setw(param_count_name_width) << parameter_count;
 		ostream << input_count << "x" << input_width << "\n";
 	}
 
@@ -414,13 +445,13 @@ private:
 
 		input_width = out_width;
 
-		ostream << left << setw(16) << "MaxPooling1D";
+		ostream << left << setw(layer_name_width) << "MaxPooling1D";
 
 		stringstream pstream;
 		pstream << width;
-		ostream << left << setw(16) << pstream.str();
+		ostream << left << setw(parameter_name_width) << pstream.str();
 
-		ostream << left << setw(16) << "0";
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "x" << input_width << "\n";
 	}
 
@@ -433,9 +464,9 @@ private:
 		Activation2D* activation2d = new Activation2D(activation, params);
 		layer2d_s.push_back(activation2d);
 
-		ostream << left << setw(16) << activation.get_name();
-		ostream << left << setw(16) << "-";
-		ostream << left << setw(16) << "0";
+		ostream << left << setw(layer_name_width) << activation.get_name();
+		ostream << left << setw(parameter_name_width) << "-";
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "x" << input_width << "\n";
 	}
 
@@ -450,9 +481,9 @@ private:
 
 		input_width = 1;
 
-		ostream << left << setw(16) << "GlobalMaxPool1D";
-		ostream << left << setw(16) << "-";
-		ostream << left << setw(16) << "0";
+		ostream << left << setw(layer_name_width) << "GlobalMaxPooling1D";
+		ostream << left << setw(parameter_name_width) << "-";
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "\n";
 	}
 
@@ -476,13 +507,13 @@ private:
 
 		input_count = count;
 
-		ostream << left << setw(16) << "Dense";
+		ostream << left << setw(layer_name_width) << "Dense";
 
 		stringstream pstream;
 		pstream << count;
-		ostream << left << setw(16) << pstream.str();
+		ostream << left << setw(parameter_name_width) << pstream.str();
 
-		ostream << left << setw(16) << parameter_count;
+		ostream << left << setw(param_count_name_width) << parameter_count;
 		ostream << input_count << "\n";
 	}
 
@@ -493,9 +524,9 @@ private:
 		Activation1D* activation1d = new Activation1D(activation, params);
 		layer1d_s.push_back(activation1d);
 
-		ostream << left << setw(16) << activation.get_name();
-		ostream << left << setw(16) << "-";
-		ostream << left << setw(16) << "0";
+		ostream << left << setw(layer_name_width) << activation.get_name();
+		ostream << left << setw(parameter_name_width) << "-";
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "\n";
 	}
 
@@ -506,9 +537,9 @@ private:
 		Softmax* softmax = new Softmax(params);
 		layer1d_s.push_back(softmax);
 
-		ostream << left << setw(16) << "Softmax";
-		ostream << left << setw(16) << "-";
-		ostream << left << setw(16) << "0";
+		ostream << left << setw(layer_name_width) << "Softmax";
+		ostream << left << setw(parameter_name_width) << "-";
+		ostream << left << setw(param_count_name_width) << "0";
 		ostream << input_count << "\n";
 	}
 };

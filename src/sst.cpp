@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	bool is_binary = stoi(argv[1]) == 1 ? true : false;
 	int max_words = 20000;
 	int max_len = 32;
-	int embedding_dim = 32;
+	int embedding_dim = 16;
 
 	Activation relu(ActivationType::RELU);
 	Activation sigmoid(ActivationType::SIGMOID, 1.0);
@@ -60,9 +60,9 @@ int main(int argc, char *argv[])
 
 	NetworkBuilder networkBuilder(max_len);
 	networkBuilder.add("Embedding", map<string, int>{{"width", embedding_dim}, {"max_words", max_words}});
+	networkBuilder.add("SpatialDropout1D", map<string, float>{{"share", 0.25}});
 	networkBuilder.add("Conv1D", map<string, int>{{"count", 8}, {"width", 3}});
 	networkBuilder.add("Activation2D", relu);
-	networkBuilder.add("MaxPooling1D", map<string, int>{{"width", 2}});
 	networkBuilder.add("GlobalMaxPooling1D");
 
 	if(is_binary)
