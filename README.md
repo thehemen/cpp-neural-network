@@ -1,5 +1,6 @@
 # C++ Neural Network
 C++ Neural Network made from scratch. Written for training purposes only. Uses [OpenMP](https://www.openmp.org/) for faster computations.
+
 |Dataset|Duration |Accuracy|
 |-------|---------|--------|
 |MNIST  |26 min.  |98.4 %  |
