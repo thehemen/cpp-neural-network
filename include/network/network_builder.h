@@ -74,9 +74,9 @@ public:
 		ostream << "\t\t\t\t\t\t\t" << input_count << "\n";
 	}
 
-	NetworkBuilder(int width, int height)
+	NetworkBuilder(int width, int height, int count = 1)
 	{
-		input_count = 1;
+		input_count = count;
 		input_width = width;
 		input_height = height;
 		total_params = 0;

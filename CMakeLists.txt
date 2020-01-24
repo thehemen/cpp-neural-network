@@ -4,6 +4,7 @@ include_directories(include)
 add_executable(xor src/xor.cpp)
 add_executable(mnist src/mnist.cpp)
 add_executable(sst src/sst.cpp)
+add_executable(cifar10 src/cifar10.cpp)
 
 find_package(OpenMP)
 if (OPENMP_FOUND)
