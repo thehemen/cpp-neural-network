@@ -1,10 +1,20 @@
 # C++ Neural Network
 C++ Neural Network made from scratch. Written for training purposes only. Uses [OpenMP](https://www.openmp.org/) for faster computations.
+<<<<<<< HEAD
+|Dataset |Duration |Accuracy|
+|--------|---------|--------|
+|MNIST   |26 min.  |98.4 %  |
+|CIFAR-10|39 min.  |56.1 %  |
+|SST-2   |33 min.  |74.9 %  |
+|SST-5   |1h. 7min.|34.3 %  |
+=======
+
 |Dataset|Duration |Accuracy|
 |-------|---------|--------|
 |MNIST  |26 min.  |98.4 %  |
 |SST-2  |33 min.  |74.9 %  |
 |SST-5  |1h. 7min.|34.3 %  |
+>>>>>>> 498bda260009ca31b93b1c3e0a6d45e529aedb09
 # Supported features
 Layers:
 * Embedding,
@@ -44,15 +54,27 @@ $ ./xor
 ```
 # How to run MNIST example
 Download [MNIST](http://yann.lecun.com/exdb/mnist/) archives and unpack it.
+
 Create /bin directory, run here:
 ```sh
 $ cmake ..
 $ cmake --build . --target mnist
 $ ./mnist [train-images-path] [train-labels-path] [test-images-path] [test-labels-path]
 ```
+# How to run CIFAR-10 example
+Download [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) archive and unpack it.
+
+Create /bin directory, run here:
+```sh
+$ cmake ..
+$ cmake --build . --target cifar10
+$ ./cifar10 [data-batch-1] ... [data-batch-5] [test-batch]
+```
 # How to run SST-2/SST-5 example
-[Download](https://github.com/HaebinShin/stanford-sentiment-dataset) refined Stanford Sentiment Treebank dataset.
+Download refined [Stanford Sentiment Treebank](https://github.com/HaebinShin/stanford-sentiment-dataset) dataset.
+
 For binary classification use *binary*-tagged files, for five-class — *fine*-tagged ones.
+
 Create /bin directory, run here:
 ```sh
 $ cmake ..
