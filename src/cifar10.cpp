@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
 	srand(time(0));
 
-	const double learning_rate = 0.0001;
+	const double learning_rate = 0.00005;
 	const double beta_1 = 0.9;
 	const double beta_2 = 0.999;
 	const double epsilon = 1e-9;
@@ -52,10 +52,10 @@ int main(int argc, char *argv[])
 
 	// LeNet-like network
 	NetworkBuilder networkBuilder(32, 32, 3);
-	networkBuilder.add("Conv2D", map<string, int>{{"count", 4}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Conv2D", map<string, int>{{"count", 8}, {"width", 3}, {"height", 3}});
 	networkBuilder.add("Activation3D", relu);
 	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
-	networkBuilder.add("Conv2D", map<string, int>{{"count", 8}, {"width", 3}, {"height", 3}});
+	networkBuilder.add("Conv2D", map<string, int>{{"count", 16}, {"width", 3}, {"height", 3}});
 	networkBuilder.add("Activation3D", relu);
 	networkBuilder.add("MaxPooling2D", map<string, int>{{"width", 2}, {"height", 2}});
 	networkBuilder.add("Flatten");

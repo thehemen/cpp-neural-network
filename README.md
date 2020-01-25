@@ -1,12 +1,16 @@
 # C++ Neural Network
-C++ Neural Network made from scratch. Written for training purposes only. Uses [OpenMP](https://www.openmp.org/) for faster computations.
+C++ Neural Network made from scratch.
 
-|Dataset |Duration |Accuracy|
-|--------|---------|--------|
-|MNIST   |26 min.  |98.4 %  |
-|CIFAR-10|39 min.  |56.1 %  |
-|SST-2   |33 min.  |74.9 %  |
-|SST-5   |1h. 7min.|34.3 %  |
+Written for training purposes only.
+
+Uses [OpenMP](https://www.openmp.org/) for faster computations.
+
+|Dataset  |Duration     |Accuracy|
+|---------|-------------|--------|
+|MNIST    |26 min.      |98.4 %  |
+|CIFAR-10 |1 h. 41 min. |60.9 %  |
+|SST-2    |33 min.      |74.9 %  |
+|SST-5    |1h. 7min.    |34.3 %  |
 
 # Supported features
 Layers:
@@ -66,7 +70,7 @@ $ ./cifar10 [data-batch-1] ... [data-batch-5] [test-batch]
 # How to run SST-2/SST-5 example
 Download refined [Stanford Sentiment Treebank](https://github.com/HaebinShin/stanford-sentiment-dataset) dataset.
 
-For binary classification use *binary*-tagged files, for five-class — *fine*-tagged ones.
+For binary classification use *binary*-tagged files, for 5-class — *fine*-tagged ones.
 
 Create /bin directory, run here:
 ```sh
